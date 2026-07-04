@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { createKnowledgeEntry } from "./actions";
+import { createKnowledgeEntry, addStarterPack } from "./actions";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -76,7 +76,14 @@ export default async function KnowledgeBasePage() {
         <Card>
           <EmptyState
             title="Your knowledge base is empty"
-            description="Add pickup times, packing lists, and camp policies above so the AI can draft accurate replies."
+            description="Start from 10 common camp policies (pickup, packing, medication, refunds...) and edit them to match your camp - or add entries one by one above."
+            action={
+              <form action={addStarterPack}>
+                <SubmitButton pendingText="Adding starter pack...">
+                  Add the starter pack
+                </SubmitButton>
+              </form>
+            }
           />
         </Card>
       ) : (

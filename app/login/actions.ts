@@ -42,21 +42,16 @@ export async function signUp(formData: FormData) {
   }
 
   const supabase = await createClient();
+  // camp_name is picked up by the handle_new_user trigger, which either
+  // creates a camp with this name or joins a camp the email was invited to.
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { full_name: fullName } },
+    options: { data: { full_name: fullName, camp_name: campName } },
   });
 
   if (error) {
     fail("signup", "", error.message);
-  }
-
-  if (data.user && campName) {
-    await supabase
-      .from("profiles")
-      .update({ camp_name: campName })
-      .eq("id", data.user.id);
   }
 
   if (!data.session) {

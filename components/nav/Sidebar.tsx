@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NAV_ITEMS } from "./nav-items";
 import { signOut } from "@/app/login/actions";
-import { LogOut } from "lucide-react";
+import { LogOut, Settings } from "lucide-react";
 
 export function Sidebar({
   campName,
@@ -51,6 +51,17 @@ export function Sidebar({
       </nav>
 
       <div className="px-3 pb-5 pt-2 border-t border-border">
+        <Link
+          href="/settings"
+          className={`flex items-center gap-3 rounded-xl px-3 h-10 mt-2 text-sm font-medium transition-colors ${
+            pathname.startsWith("/settings")
+              ? "bg-primary-soft text-primary"
+              : "text-muted hover:bg-surface-muted hover:text-foreground"
+          }`}
+        >
+          <Settings size={17} strokeWidth={2} />
+          Settings
+        </Link>
         <p className="px-3 pt-3 pb-1 text-xs text-muted truncate">{email}</p>
         <form action={signOut}>
           <button

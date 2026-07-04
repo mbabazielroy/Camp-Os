@@ -1,13 +1,26 @@
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
-import { todayISODate, formatRelativeTime } from "@/lib/dates";
+import { requireCamp } from "@/lib/auth";
+import { createTask } from "@/app/(app)/tasks/actions";
+import { addStarterPack } from "@/app/(app)/knowledge-base/actions";
+import { todayISODate, tomorrowISODate, formatRelativeTime } from "@/lib/dates";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { LinkButton } from "@/components/ui/Button";
+import { Input, Select } from "@/components/ui/Field";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import { TaskItem } from "@/components/tasks/TaskItem";
 import { EMAIL_URGENCY_LABELS, EMAIL_URGENCY_STYLES } from "@/lib/labels";
-import { Mail, ListTodo, Plus, ArrowRight, Sun } from "lucide-react";
+import {
+  Mail,
+  ListTodo,
+  Plus,
+  ArrowRight,
+  Sun,
+  Sparkles,
+  CheckCircle2,
+  Circle,
+} from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -18,22 +31,28 @@ function greetingForHour(hour: number) {
 }
 
 export default async function DashboardPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, campId, fullName } = await requireCamp();
 
   const today = todayISODate();
+  const tomorrow = tomorrowISODate();
 
   const [
+    { data: camp },
     { data: priorityTasks },
     { count: openTaskCount },
+    { count: overdueCount },
     { data: pendingEmails },
     { count: pendingEmailCount },
+    { count: urgentEmailCount },
+    { count: kbCount },
+    { count: emailEverCount },
+    { data: gmailAccount },
   ] = await Promise.all([
+    supabase.from("camps").select("name").eq("id", campId).maybeSingle(),
     supabase
       .from("tasks")
       .select("*")
+      .eq("camp_id", campId)
       .eq("status", "open")
       .or(`due_date.lte.${today},due_date.is.null`)
       .order("due_date", { ascending: true, nullsFirst: false })
@@ -42,24 +61,75 @@ export default async function DashboardPage() {
     supabase
       .from("tasks")
       .select("id", { count: "exact", head: true })
+      .eq("camp_id", campId)
       .eq("status", "open"),
+    supabase
+      .from("tasks")
+      .select("id", { count: "exact", head: true })
+      .eq("camp_id", campId)
+      .eq("status", "open")
+      .lt("due_date", today),
     supabase
       .from("email_drafts")
       .select("*")
+      .eq("camp_id", campId)
       .eq("status", "pending")
       .order("created_at", { ascending: false })
       .limit(5),
     supabase
       .from("email_drafts")
       .select("id", { count: "exact", head: true })
+      .eq("camp_id", campId)
       .eq("status", "pending"),
+    supabase
+      .from("email_drafts")
+      .select("id", { count: "exact", head: true })
+      .eq("camp_id", campId)
+      .eq("status", "pending")
+      .in("urgency", ["high", "urgent"]),
+    supabase
+      .from("knowledge_base")
+      .select("id", { count: "exact", head: true })
+      .eq("camp_id", campId),
+    supabase
+      .from("email_drafts")
+      .select("id", { count: "exact", head: true })
+      .eq("camp_id", campId),
+    supabase.from("gmail_accounts").select("email").eq("camp_id", campId).maybeSingle(),
   ]);
 
-  const firstName: string | undefined =
-    user?.user_metadata?.full_name?.split(" ")?.[0];
+  const firstName = fullName?.split(" ")?.[0];
   const now = new Date();
   const caughtUp =
     (priorityTasks?.length ?? 0) === 0 && (pendingEmails?.length ?? 0) === 0;
+
+  // Onboarding: shown until the camp has a real name, some knowledge, and
+  // has processed at least one email.
+  const campNamed = Boolean(camp?.name && camp.name !== "My Camp");
+  const hasKnowledge = (kbCount ?? 0) > 0;
+  const processedEmail = (emailEverCount ?? 0) > 0;
+  const onboarding = !(campNamed && hasKnowledge && processedEmail);
+
+  // Rule-based morning briefing: the one thing that can't wait.
+  const topUrgentEmail = pendingEmails?.find(
+    (d) => d.urgency === "urgent" || d.urgency === "high"
+  );
+  const topOverdueTask = priorityTasks?.find(
+    (t) => t.due_date && t.due_date < today
+  );
+  const briefingParts: string[] = [];
+  if ((urgentEmailCount ?? 0) > 0) {
+    briefingParts.push(
+      `${urgentEmailCount} urgent email${urgentEmailCount === 1 ? "" : "s"} waiting`
+    );
+  } else if ((pendingEmailCount ?? 0) > 0) {
+    briefingParts.push(
+      `${pendingEmailCount} draft${pendingEmailCount === 1 ? "" : "s"} to review`
+    );
+  }
+  if ((overdueCount ?? 0) > 0) {
+    briefingParts.push(`${overdueCount} task${overdueCount === 1 ? "" : "s"} overdue`);
+  }
 
   return (
     <div>
@@ -89,8 +159,27 @@ export default async function DashboardPage() {
           <p className="text-sm text-white/80 mt-1">
             {caughtUp
               ? "All clear - go be with the campers."
-              : "Here's what needs you before you head out."}
+              : briefingParts.length > 0
+                ? `Today: ${briefingParts.join(" and ")}.`
+                : "Here's what needs you before you head out."}
           </p>
+          {(topUrgentEmail || topOverdueTask) && (
+            <Link
+              href={
+                topUrgentEmail ? `/email-assistant/${topUrgentEmail.id}` : "/tasks"
+              }
+              className="mt-3 flex items-start gap-2 rounded-xl bg-white/10 border border-white/20 px-3 py-2.5 hover:bg-white/15 transition-colors"
+            >
+              <Sparkles size={15} className="mt-0.5 shrink-0 text-white/90" />
+              <span className="text-sm text-white/95 min-w-0">
+                <span className="font-medium">Can&apos;t wait: </span>
+                {topUrgentEmail
+                  ? topUrgentEmail.ai_summary ||
+                    `Urgent email from ${topUrgentEmail.sender_name || topUrgentEmail.sender_email || "a parent"}`
+                  : topOverdueTask!.title}
+              </span>
+            </Link>
+          )}
           <div className="flex flex-wrap gap-2 mt-4">
             <LinkButton
               href="/email-assistant/new"
@@ -99,19 +188,78 @@ export default async function DashboardPage() {
             >
               <Mail size={15} /> Paste an email
             </LinkButton>
-            <LinkButton
-              href="/tasks"
-              size="sm"
-              className="!bg-white/15 !text-white border border-white/25 hover:!bg-white/25"
-            >
-              <Plus size={15} /> Add a task
-            </LinkButton>
+            {gmailAccount && (
+              <LinkButton
+                href="/email-assistant"
+                size="sm"
+                className="!bg-white/15 !text-white border border-white/25 hover:!bg-white/25"
+              >
+                <ArrowRight size={15} /> Review inbox
+              </LinkButton>
+            )}
           </div>
         </div>
       </div>
 
+      {/* Onboarding checklist */}
+      {onboarding && (
+        <Card className="p-4 mb-5">
+          <p className="font-semibold text-foreground mb-1">Set up CampFlow</p>
+          <p className="text-sm text-muted mb-3">
+            Three quick steps and the AI starts writing replies that sound like your camp.
+          </p>
+          <div className="space-y-2.5">
+            <Link href="/settings" className="flex items-center gap-2.5 group">
+              {campNamed ? (
+                <CheckCircle2 size={19} className="text-primary shrink-0" />
+              ) : (
+                <Circle size={19} className="text-border shrink-0" />
+              )}
+              <span
+                className={`text-sm ${campNamed ? "text-muted line-through" : "text-foreground group-hover:text-primary"}`}
+              >
+                Name your camp in Settings
+              </span>
+            </Link>
+            <div className="flex items-center justify-between gap-2">
+              <Link href="/knowledge-base" className="flex items-center gap-2.5 group min-w-0">
+                {hasKnowledge ? (
+                  <CheckCircle2 size={19} className="text-primary shrink-0" />
+                ) : (
+                  <Circle size={19} className="text-border shrink-0" />
+                )}
+                <span
+                  className={`text-sm ${hasKnowledge ? "text-muted line-through" : "text-foreground group-hover:text-primary"}`}
+                >
+                  Add camp knowledge (rules, pickup times, policies)
+                </span>
+              </Link>
+              {!hasKnowledge && (
+                <form action={addStarterPack} className="shrink-0">
+                  <SubmitButton pendingText="Adding..." variant="secondary">
+                    Add starter pack
+                  </SubmitButton>
+                </form>
+              )}
+            </div>
+            <Link href="/email-assistant/new" className="flex items-center gap-2.5 group">
+              {processedEmail ? (
+                <CheckCircle2 size={19} className="text-primary shrink-0" />
+              ) : (
+                <Circle size={19} className="text-border shrink-0" />
+              )}
+              <span
+                className={`text-sm ${processedEmail ? "text-muted line-through" : "text-foreground group-hover:text-primary"}`}
+              >
+                Run your first email through the assistant
+              </span>
+            </Link>
+          </div>
+        </Card>
+      )}
+
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-3 mb-6">
+      <div className="grid grid-cols-2 gap-3 mb-5">
         <Link href="/tasks" className="group">
           <Card className="p-4 transition-shadow group-hover:shadow-card-hover">
             <div className="flex items-center justify-between">
@@ -152,6 +300,32 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
+      {/* Quick add task */}
+      <Card className="p-3 mb-6">
+        <form action={createTask} className="flex gap-2">
+          <Input
+            name="title"
+            placeholder="Quick task... (try the mic on your keyboard)"
+            required
+            className="flex-1 min-w-0"
+            enterKeyHint="done"
+          />
+          <Select
+            name="due_date"
+            defaultValue={today}
+            className="basis-28 grow-0 shrink-0"
+            aria-label="Due date"
+          >
+            <option value={today}>Today</option>
+            <option value={tomorrow}>Tomorrow</option>
+            <option value="">No date</option>
+          </Select>
+          <SubmitButton pendingText="..." className="shrink-0 !px-3">
+            <Plus size={18} />
+          </SubmitButton>
+        </form>
+      </Card>
+
       <section className="mb-8">
         <div className="flex items-center justify-between mb-2">
           <h2 className="font-semibold text-foreground">Due today &amp; overdue</h2>
@@ -174,11 +348,6 @@ export default async function DashboardPage() {
               <EmptyState
                 title="Nothing urgent"
                 description="You're all caught up on tasks for today."
-                action={
-                  <LinkButton href="/tasks" variant="secondary" size="sm">
-                    <Plus size={16} /> Add a task
-                  </LinkButton>
-                }
               />
             </div>
           )}
@@ -211,7 +380,7 @@ export default async function DashboardPage() {
                       {draft.sender_name || draft.sender_email || "Unknown sender"}
                     </p>
                     <p className="text-sm text-muted truncate">
-                      {draft.ai_summary || draft.original_email.slice(0, 80)}
+                      {draft.ai_summary || draft.subject || draft.original_email.slice(0, 80)}
                     </p>
                   </div>
                   <div className="flex flex-col items-end gap-1 shrink-0">

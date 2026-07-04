@@ -2,6 +2,10 @@ export function todayISODate() {
   return new Date().toISOString().slice(0, 10);
 }
 
+export function tomorrowISODate() {
+  return new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
+}
+
 export function formatDueDate(dueDate: string | null): {
   label: string;
   overdue: boolean;

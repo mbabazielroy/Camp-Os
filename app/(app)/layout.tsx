@@ -20,11 +20,19 @@ export default async function AppLayout({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("camp_name")
+    .select("camp_id")
     .eq("id", user.id)
     .maybeSingle();
 
-  const campName = profile?.camp_name ?? null;
+  let campName: string | null = null;
+  if (profile?.camp_id) {
+    const { data: camp } = await supabase
+      .from("camps")
+      .select("name")
+      .eq("id", profile.camp_id)
+      .maybeSingle();
+    campName = camp?.name ?? null;
+  }
 
   return (
     <div className="flex min-h-screen">

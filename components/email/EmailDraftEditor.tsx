@@ -33,11 +33,13 @@ export function EmailDraftEditor({
   initialCategory,
   initialUrgency,
   saveAction,
+  isGmail = false,
 }: {
   initialDraft: string;
   initialCategory: EmailCategory;
   initialUrgency: EmailUrgency;
   saveAction: (formData: FormData) => void | Promise<void>;
+  isGmail?: boolean;
 }) {
   const [text, setText] = useState(initialDraft);
 
@@ -79,8 +81,9 @@ export function EmailDraftEditor({
           rows={12}
         />
         <p className="text-xs text-muted mt-1.5">
-          This is only a draft. Nothing is sent automatically - copy it into your email client
-          once you&apos;re happy with it.
+          {isGmail
+            ? "Nothing is sent automatically. Approving saves this reply into your Gmail drafts folder for you to send."
+            : "This is only a draft. Nothing is sent automatically - copy it into your email client once you're happy with it."}
         </p>
       </div>
 

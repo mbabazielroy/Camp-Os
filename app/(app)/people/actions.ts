@@ -2,16 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-
-async function requireUser() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Not authenticated");
-  return { supabase, user };
-}
+import { requireCamp } from "@/lib/auth";
 
 function revalidatePeople() {
   revalidatePath("/people/campers");
@@ -22,14 +13,14 @@ function revalidatePeople() {
 // --- Guardians -------------------------------------------------------------
 
 export async function createGuardian(formData: FormData) {
-  const { supabase, user } = await requireUser();
+  const { supabase, campId } = await requireCamp();
 
   const firstName = String(formData.get("first_name") ?? "").trim();
   const lastName = String(formData.get("last_name") ?? "").trim();
   if (!firstName || !lastName) return;
 
   await supabase.from("guardians").insert({
-    user_id: user.id,
+    camp_id: campId,
     first_name: firstName,
     last_name: lastName,
     email: String(formData.get("email") ?? "").trim() || null,
@@ -42,7 +33,7 @@ export async function createGuardian(formData: FormData) {
 }
 
 export async function updateGuardian(id: string, formData: FormData) {
-  const { supabase, user } = await requireUser();
+  const { supabase, campId } = await requireCamp();
 
   const firstName = String(formData.get("first_name") ?? "").trim();
   const lastName = String(formData.get("last_name") ?? "").trim();
@@ -59,15 +50,15 @@ export async function updateGuardian(id: string, formData: FormData) {
       notes: String(formData.get("notes") ?? "").trim() || null,
     })
     .eq("id", id)
-    .eq("user_id", user.id);
+    .eq("camp_id", campId);
 
   revalidatePeople();
   redirect("/people/guardians");
 }
 
 export async function deleteGuardian(id: string) {
-  const { supabase, user } = await requireUser();
-  await supabase.from("guardians").delete().eq("id", id).eq("user_id", user.id);
+  const { supabase, campId } = await requireCamp();
+  await supabase.from("guardians").delete().eq("id", id).eq("camp_id", campId);
   revalidatePeople();
   redirect("/people/guardians");
 }
@@ -75,7 +66,7 @@ export async function deleteGuardian(id: string) {
 // --- Campers -----------------------------------------------------------------
 
 export async function createCamper(formData: FormData) {
-  const { supabase, user } = await requireUser();
+  const { supabase, campId } = await requireCamp();
 
   const firstName = String(formData.get("first_name") ?? "").trim();
   const lastName = String(formData.get("last_name") ?? "").trim();
@@ -86,7 +77,7 @@ export async function createCamper(formData: FormData) {
   const guardianId = String(formData.get("guardian_id") ?? "").trim() || null;
 
   await supabase.from("campers").insert({
-    user_id: user.id,
+    camp_id: campId,
     first_name: firstName,
     last_name: lastName,
     cabin: String(formData.get("cabin") ?? "").trim() || null,
@@ -99,7 +90,7 @@ export async function createCamper(formData: FormData) {
 }
 
 export async function updateCamper(id: string, formData: FormData) {
-  const { supabase, user } = await requireUser();
+  const { supabase, campId } = await requireCamp();
 
   const firstName = String(formData.get("first_name") ?? "").trim();
   const lastName = String(formData.get("last_name") ?? "").trim();
@@ -120,15 +111,15 @@ export async function updateCamper(id: string, formData: FormData) {
       notes: String(formData.get("notes") ?? "").trim() || null,
     })
     .eq("id", id)
-    .eq("user_id", user.id);
+    .eq("camp_id", campId);
 
   revalidatePeople();
   redirect("/people/campers");
 }
 
 export async function deleteCamper(id: string) {
-  const { supabase, user } = await requireUser();
-  await supabase.from("campers").delete().eq("id", id).eq("user_id", user.id);
+  const { supabase, campId } = await requireCamp();
+  await supabase.from("campers").delete().eq("id", id).eq("camp_id", campId);
   revalidatePeople();
   redirect("/people/campers");
 }
@@ -136,14 +127,14 @@ export async function deleteCamper(id: string) {
 // --- Staff -------------------------------------------------------------------
 
 export async function createStaff(formData: FormData) {
-  const { supabase, user } = await requireUser();
+  const { supabase, campId } = await requireCamp();
 
   const firstName = String(formData.get("first_name") ?? "").trim();
   const lastName = String(formData.get("last_name") ?? "").trim();
   if (!firstName || !lastName) return;
 
   await supabase.from("staff").insert({
-    user_id: user.id,
+    camp_id: campId,
     first_name: firstName,
     last_name: lastName,
     role: String(formData.get("role") ?? "").trim() || null,
@@ -156,7 +147,7 @@ export async function createStaff(formData: FormData) {
 }
 
 export async function updateStaff(id: string, formData: FormData) {
-  const { supabase, user } = await requireUser();
+  const { supabase, campId } = await requireCamp();
 
   const firstName = String(formData.get("first_name") ?? "").trim();
   const lastName = String(formData.get("last_name") ?? "").trim();
@@ -173,15 +164,15 @@ export async function updateStaff(id: string, formData: FormData) {
       notes: String(formData.get("notes") ?? "").trim() || null,
     })
     .eq("id", id)
-    .eq("user_id", user.id);
+    .eq("camp_id", campId);
 
   revalidatePeople();
   redirect("/people/staff");
 }
 
 export async function deleteStaff(id: string) {
-  const { supabase, user } = await requireUser();
-  await supabase.from("staff").delete().eq("id", id).eq("user_id", user.id);
+  const { supabase, campId } = await requireCamp();
+  await supabase.from("staff").delete().eq("id", id).eq("camp_id", campId);
   revalidatePeople();
   redirect("/people/staff");
 }

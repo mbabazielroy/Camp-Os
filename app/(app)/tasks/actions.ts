@@ -2,17 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { requireCamp } from "@/lib/auth";
 import type { TaskPriority } from "@/lib/supabase/database.types";
-
-async function requireUser() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Not authenticated");
-  return { supabase, user };
-}
 
 function revalidateTaskViews() {
   revalidatePath("/tasks");
@@ -20,7 +11,7 @@ function revalidateTaskViews() {
 }
 
 export async function createTask(formData: FormData) {
-  const { supabase, user } = await requireUser();
+  const { supabase, campId, userId } = await requireCamp();
 
   const title = String(formData.get("title") ?? "").trim();
   if (!title) return;
@@ -30,7 +21,8 @@ export async function createTask(formData: FormData) {
   const priority = (String(formData.get("priority") ?? "medium") as TaskPriority) || "medium";
 
   await supabase.from("tasks").insert({
-    user_id: user.id,
+    camp_id: campId,
+    created_by: userId,
     title,
     description,
     due_date: dueDate,
@@ -41,7 +33,7 @@ export async function createTask(formData: FormData) {
 }
 
 export async function updateTask(id: string, formData: FormData) {
-  const { supabase, user } = await requireUser();
+  const { supabase, campId } = await requireCamp();
 
   const title = String(formData.get("title") ?? "").trim();
   if (!title) return;
@@ -53,27 +45,27 @@ export async function updateTask(id: string, formData: FormData) {
     .from("tasks")
     .update({ title, description, due_date: dueDate, priority })
     .eq("id", id)
-    .eq("user_id", user.id);
+    .eq("camp_id", campId);
 
   revalidateTaskViews();
 }
 
 export async function toggleTaskStatus(id: string, nextStatus: "open" | "done") {
-  const { supabase, user } = await requireUser();
+  const { supabase, campId } = await requireCamp();
 
   await supabase
     .from("tasks")
     .update({ status: nextStatus })
     .eq("id", id)
-    .eq("user_id", user.id);
+    .eq("camp_id", campId);
 
   revalidateTaskViews();
 }
 
 export async function deleteTask(id: string) {
-  const { supabase, user } = await requireUser();
+  const { supabase, campId } = await requireCamp();
 
-  await supabase.from("tasks").delete().eq("id", id).eq("user_id", user.id);
+  await supabase.from("tasks").delete().eq("id", id).eq("camp_id", campId);
 
   revalidateTaskViews();
   redirect("/tasks");

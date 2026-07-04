@@ -1,5 +1,6 @@
+import Link from "next/link";
 import { signOut } from "@/app/login/actions";
-import { LogOut } from "lucide-react";
+import { LogOut, Settings } from "lucide-react";
 
 export function TopBar({ campName }: { campName: string | null }) {
   return (
@@ -17,15 +18,24 @@ export function TopBar({ campName }: { campName: string | null }) {
           </p>
         </div>
       </div>
-      <form action={signOut}>
-        <button
-          type="submit"
-          aria-label="Sign out"
+      <div className="flex items-center gap-1">
+        <Link
+          href="/settings"
+          aria-label="Settings"
           className="flex h-9 w-9 items-center justify-center rounded-lg text-muted hover:bg-surface-muted hover:text-foreground"
         >
-          <LogOut size={18} strokeWidth={2} />
-        </button>
-      </form>
+          <Settings size={18} strokeWidth={2} />
+        </Link>
+        <form action={signOut}>
+          <button
+            type="submit"
+            aria-label="Sign out"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-muted hover:bg-surface-muted hover:text-foreground"
+          >
+            <LogOut size={18} strokeWidth={2} />
+          </button>
+        </form>
+      </div>
     </header>
   );
 }

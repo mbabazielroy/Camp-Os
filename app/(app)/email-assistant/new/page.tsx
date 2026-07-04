@@ -42,6 +42,10 @@ export default async function NewEmailPage({
             </div>
           </div>
           <div>
+            <Label htmlFor="subject">Subject (optional)</Label>
+            <Input id="subject" name="subject" placeholder="Early pickup Friday" />
+          </div>
+          <div>
             <Label htmlFor="original_email">Email text</Label>
             <Textarea
               id="original_email"

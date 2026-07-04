@@ -1,18 +1,25 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { saveEmailDraft, regenerateDraft, deleteEmailDraft } from "../actions";
+import {
+  saveEmailDraft,
+  regenerateDraft,
+  deleteEmailDraft,
+  acceptSuggestedTask,
+} from "../actions";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { ConfirmButton } from "@/components/ui/ConfirmButton";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import { EmailDraftEditor } from "@/components/email/EmailDraftEditor";
 import { RegenerateForm } from "@/components/email/RegenerateForm";
+import { formatDueDate } from "@/lib/dates";
 import {
   EMAIL_CATEGORY_LABELS,
   EMAIL_URGENCY_LABELS,
   EMAIL_URGENCY_STYLES,
 } from "@/lib/labels";
-import { Sparkles } from "lucide-react";
+import { Sparkles, ListTodo, Check } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -37,12 +44,13 @@ export default async function EmailDraftPage({
   const saveWithId = saveEmailDraft.bind(null, draft.id);
   const regenerateWithId = regenerateDraft.bind(null, draft.id);
   const deleteWithId = deleteEmailDraft.bind(null, draft.id);
+  const acceptTaskWithId = acceptSuggestedTask.bind(null, draft.id);
 
   return (
     <div>
       <PageHeader
         title={draft.sender_name || draft.sender_email || "Email"}
-        description={draft.sender_email ?? undefined}
+        description={draft.subject || draft.sender_email || undefined}
         action={
           draft.status !== "pending" ? (
             <Badge
@@ -80,6 +88,42 @@ export default async function EmailDraftPage({
         </div>
       )}
 
+      {draft.suggested_task_title && (
+        <Card className="p-4 mb-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start gap-2.5 min-w-0">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent-soft text-accent">
+                <ListTodo size={16} />
+              </span>
+              <div className="min-w-0">
+                <p className="text-xs font-medium text-muted uppercase tracking-wide">
+                  Suggested follow-up
+                </p>
+                <p className="text-sm font-medium text-foreground mt-0.5">
+                  {draft.suggested_task_title}
+                </p>
+                {draft.suggested_task_due && (
+                  <p className="text-xs text-muted mt-0.5">
+                    {formatDueDate(draft.suggested_task_due).label}
+                  </p>
+                )}
+              </div>
+            </div>
+            {draft.suggested_task_accepted ? (
+              <Badge className="bg-primary-soft text-primary shrink-0">
+                <Check size={12} className="mr-1" /> Added
+              </Badge>
+            ) : (
+              <form action={acceptTaskWithId} className="shrink-0">
+                <SubmitButton pendingText="Adding..." variant="secondary">
+                  Add task
+                </SubmitButton>
+              </form>
+            )}
+          </div>
+        </Card>
+      )}
+
       <Card className="p-4 mb-4">
         <p className="text-xs font-medium text-muted uppercase tracking-wide mb-2">
           Original email
@@ -98,6 +142,7 @@ export default async function EmailDraftPage({
               initialCategory={draft.category ?? "other"}
               initialUrgency={draft.urgency ?? "medium"}
               saveAction={saveWithId}
+              isGmail={draft.source === "gmail"}
             />
           </Card>
 
