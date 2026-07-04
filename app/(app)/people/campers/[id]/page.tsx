@@ -4,7 +4,7 @@ import { updateCamper, deleteCamper } from "../../actions";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Card } from "@/components/ui/Card";
 import { Input, Select, Textarea, Label } from "@/components/ui/Field";
-import { Button } from "@/components/ui/Button";
+import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { SubmitButton } from "@/components/ui/SubmitButton";
 
 export const dynamic = "force-dynamic";
@@ -78,9 +78,9 @@ export default async function CamperDetailPage({
       </Card>
 
       <form action={deleteWithId} className="mt-4">
-        <Button type="submit" variant="danger" size="sm">
+        <ConfirmButton confirmMessage="Delete this camper record? This can't be undone.">
           Delete camper
-        </Button>
+        </ConfirmButton>
       </form>
     </div>
   );

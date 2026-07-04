@@ -9,7 +9,7 @@ export function BottomNav() {
 
   return (
     <nav
-      className="md:hidden fixed bottom-0 inset-x-0 z-20 bg-surface border-t border-border"
+      className="md:hidden fixed bottom-0 inset-x-0 z-20 bg-surface/95 backdrop-blur border-t border-border"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <div className="grid grid-cols-5">
@@ -20,11 +20,17 @@ export function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center justify-center gap-0.5 py-2.5 text-[11px] font-medium transition-colors ${
+              className={`flex flex-col items-center justify-center gap-1 py-2 text-[11px] font-medium transition-colors ${
                 active ? "text-primary" : "text-muted"
               }`}
             >
-              <Icon size={20} strokeWidth={active ? 2.4 : 2} />
+              <span
+                className={`flex h-7 w-12 items-center justify-center rounded-full transition-colors ${
+                  active ? "bg-primary-soft" : ""
+                }`}
+              >
+                <Icon size={19} strokeWidth={active ? 2.4 : 2} />
+              </span>
               {item.label}
             </Link>
           );

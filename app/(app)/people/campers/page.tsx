@@ -6,14 +6,31 @@ import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Input, Select, Textarea, Label } from "@/components/ui/Field";
 import { SubmitButton } from "@/components/ui/SubmitButton";
+import { SearchBox } from "@/components/people/SearchBox";
 
 export const dynamic = "force-dynamic";
 
-export default async function CampersPage() {
+export default async function CampersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const { q } = await searchParams;
   const supabase = await createClient();
 
+  let campersQuery = supabase
+    .from("campers")
+    .select("*")
+    .order("last_name", { ascending: true });
+  if (q?.trim()) {
+    const term = q.trim().replaceAll("%", "").replaceAll(",", "");
+    campersQuery = campersQuery.or(
+      `first_name.ilike.%${term}%,last_name.ilike.%${term}%,cabin.ilike.%${term}%`
+    );
+  }
+
   const [{ data: campers }, { data: guardians }] = await Promise.all([
-    supabase.from("campers").select("*").order("last_name", { ascending: true }),
+    campersQuery,
     supabase.from("guardians").select("id, first_name, last_name").order("last_name"),
   ]);
 
@@ -72,6 +89,8 @@ export default async function CampersPage() {
         </form>
       </Card>
 
+      <SearchBox placeholder="Search campers by name or cabin..." defaultValue={q} />
+
       <Card className="px-3">
         {campers && campers.length > 0 ? (
           <div className="divide-y divide-border">
@@ -104,7 +123,10 @@ export default async function CampersPage() {
           </div>
         ) : (
           <div className="py-6">
-            <EmptyState title="No campers yet" description="Add your first camper above." />
+            <EmptyState
+              title={q ? "No campers match your search" : "No campers yet"}
+              description={q ? "Try a different name or cabin." : "Add your first camper above."}
+            />
           </div>
         )}
       </Card>

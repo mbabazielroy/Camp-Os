@@ -6,15 +6,26 @@ import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Input, Textarea, Label } from "@/components/ui/Field";
 import { SubmitButton } from "@/components/ui/SubmitButton";
+import { SearchBox } from "@/components/people/SearchBox";
 
 export const dynamic = "force-dynamic";
 
-export default async function StaffPage() {
+export default async function StaffPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const { q } = await searchParams;
   const supabase = await createClient();
-  const { data: staff } = await supabase
-    .from("staff")
-    .select("*")
-    .order("last_name", { ascending: true });
+
+  let query = supabase.from("staff").select("*").order("last_name", { ascending: true });
+  if (q?.trim()) {
+    const term = q.trim().replaceAll("%", "").replaceAll(",", "");
+    query = query.or(
+      `first_name.ilike.%${term}%,last_name.ilike.%${term}%,role.ilike.%${term}%`
+    );
+  }
+  const { data: staff } = await query;
 
   return (
     <div>
@@ -54,6 +65,8 @@ export default async function StaffPage() {
         </form>
       </Card>
 
+      <SearchBox placeholder="Search staff by name or role..." defaultValue={q} />
+
       <Card className="px-3">
         {staff && staff.length > 0 ? (
           <div className="divide-y divide-border">
@@ -77,7 +90,10 @@ export default async function StaffPage() {
           </div>
         ) : (
           <div className="py-6">
-            <EmptyState title="No staff yet" description="Add your first staff member above." />
+            <EmptyState
+              title={q ? "No staff match your search" : "No staff yet"}
+              description={q ? "Try a different name or role." : "Add your first staff member above."}
+            />
           </div>
         )}
       </Card>

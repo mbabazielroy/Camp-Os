@@ -56,8 +56,8 @@ export async function analyzeAndDraftEmail(input: {
   const userMessage = [
     `CAMP KNOWLEDGE BASE:\n${buildKnowledgeBaseText(input.knowledgeBase)}`,
     input.senderName ? `SENDER NAME: ${input.senderName}` : null,
-    `INCOMING EMAIL:\n${input.originalEmail}`,
-    input.instructions ? `ADDITIONAL INSTRUCTIONS FROM THE DIRECTOR:\n${input.instructions}` : null,
+    `INCOMING EMAIL:\n${input.originalEmail.slice(0, 15000)}`,
+    input.instructions ? `ADDITIONAL INSTRUCTIONS FROM THE DIRECTOR:\n${input.instructions.slice(0, 2000)}` : null,
   ]
     .filter(Boolean)
     .join("\n\n");

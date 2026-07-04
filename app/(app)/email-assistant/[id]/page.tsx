@@ -4,19 +4,27 @@ import { saveEmailDraft, regenerateDraft, deleteEmailDraft } from "../actions";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
+import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { EmailDraftEditor } from "@/components/email/EmailDraftEditor";
 import { RegenerateForm } from "@/components/email/RegenerateForm";
-import { EMAIL_URGENCY_LABELS, EMAIL_URGENCY_STYLES } from "@/lib/labels";
+import {
+  EMAIL_CATEGORY_LABELS,
+  EMAIL_URGENCY_LABELS,
+  EMAIL_URGENCY_STYLES,
+} from "@/lib/labels";
+import { Sparkles } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 export default async function EmailDraftPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   const { id } = await params;
+  const { error } = await searchParams;
   const supabase = await createClient();
   const { data: draft } = await supabase
     .from("email_drafts")
@@ -54,6 +62,24 @@ export default async function EmailDraftPage({
         }
       />
 
+      {error && (
+        <p className="mb-4 rounded-lg bg-danger-soft text-danger text-sm px-3 py-2">{error}</p>
+      )}
+
+      {draft.ai_summary && (
+        <div className="mb-4 flex items-start gap-2.5 rounded-2xl bg-primary-soft px-4 py-3">
+          <Sparkles size={16} className="text-primary mt-0.5 shrink-0" />
+          <div className="min-w-0">
+            <p className="text-sm text-foreground">{draft.ai_summary}</p>
+            {draft.category && (
+              <p className="text-xs text-muted mt-0.5">
+                Filed under {EMAIL_CATEGORY_LABELS[draft.category]}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
       <Card className="p-4 mb-4">
         <p className="text-xs font-medium text-muted uppercase tracking-wide mb-2">
           Original email
@@ -67,6 +93,7 @@ export default async function EmailDraftPage({
         <>
           <Card className="p-4 mb-4">
             <EmailDraftEditor
+              key={draft.updated_at}
               initialDraft={draft.edited_draft ?? draft.ai_draft ?? ""}
               initialCategory={draft.category ?? "other"}
               initialUrgency={draft.urgency ?? "medium"}
@@ -91,9 +118,13 @@ export default async function EmailDraftPage({
       )}
 
       <form action={deleteWithId}>
-        <Button type="submit" variant="ghost" size="sm" className="text-danger">
+        <ConfirmButton
+          confirmMessage="Delete this email and its draft? This can't be undone."
+          variant="ghost"
+          className="text-danger"
+        >
           Delete
-        </Button>
+        </ConfirmButton>
       </form>
     </div>
   );

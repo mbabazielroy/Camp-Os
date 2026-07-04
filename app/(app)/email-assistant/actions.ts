@@ -79,7 +79,7 @@ export async function createEmailDraft(formData: FormData) {
 }
 
 export async function saveEmailDraft(id: string, formData: FormData) {
-  const { supabase } = await requireUser();
+  const { supabase, user } = await requireUser();
 
   const editedDraft = String(formData.get("edited_draft") ?? "");
   const category = String(formData.get("category") ?? "other") as EmailCategory;
@@ -91,7 +91,8 @@ export async function saveEmailDraft(id: string, formData: FormData) {
   await supabase
     .from("email_drafts")
     .update({ edited_draft: editedDraft, category, urgency, status })
-    .eq("id", id);
+    .eq("id", id)
+    .eq("user_id", user.id);
 
   revalidatePath("/email-assistant");
   revalidatePath(`/email-assistant/${id}`);
@@ -103,12 +104,13 @@ export async function saveEmailDraft(id: string, formData: FormData) {
 }
 
 export async function regenerateDraft(id: string, formData: FormData) {
-  const { supabase } = await requireUser();
+  const { supabase, user } = await requireUser();
 
   const { data: draft } = await supabase
     .from("email_drafts")
     .select("original_email, sender_name")
     .eq("id", id)
+    .eq("user_id", user.id)
     .maybeSingle();
 
   if (!draft) redirect("/email-assistant");
@@ -116,12 +118,22 @@ export async function regenerateDraft(id: string, formData: FormData) {
   const instructions = String(formData.get("instructions") ?? "").trim();
   const knowledgeBase = await fetchKnowledgeBase(supabase);
 
-  const analysis = await analyzeAndDraftEmail({
-    originalEmail: draft.original_email,
-    senderName: draft.sender_name,
-    knowledgeBase,
-    instructions: instructions || undefined,
-  });
+  let analysis: EmailAnalysis;
+  try {
+    analysis = await analyzeAndDraftEmail({
+      originalEmail: draft.original_email,
+      senderName: draft.sender_name,
+      knowledgeBase,
+      instructions: instructions || undefined,
+    });
+  } catch {
+    redirect(
+      `/email-assistant/${id}?error=` +
+        encodeURIComponent(
+          "The AI assistant couldn't regenerate the draft. Your current draft is unchanged - please try again."
+        )
+    );
+  }
 
   await supabase
     .from("email_drafts")
@@ -133,15 +145,17 @@ export async function regenerateDraft(id: string, formData: FormData) {
       edited_draft: analysis.draft,
       status: "pending",
     })
-    .eq("id", id);
+    .eq("id", id)
+    .eq("user_id", user.id);
 
   revalidatePath(`/email-assistant/${id}`);
+  redirect(`/email-assistant/${id}`);
 }
 
 export async function deleteEmailDraft(id: string) {
-  const { supabase } = await requireUser();
+  const { supabase, user } = await requireUser();
 
-  await supabase.from("email_drafts").delete().eq("id", id);
+  await supabase.from("email_drafts").delete().eq("id", id).eq("user_id", user.id);
 
   revalidatePath("/email-assistant");
   revalidatePath("/dashboard");

@@ -13,13 +13,9 @@ export function TaskItem({ task, linkToEdit = true }: { task: Task; linkToEdit?:
   const nextStatus = task.status === "done" ? "open" : "done";
   const isDone = task.status === "done";
 
-  const Title = (
-    <p
-      className={`font-medium text-foreground truncate ${isDone ? "line-through text-muted" : ""}`}
-    >
-      {task.title}
-    </p>
-  );
+  const titleClass = `font-medium truncate ${
+    isDone ? "line-through text-muted" : "text-foreground"
+  }`;
 
   return (
     <div className="flex items-center gap-3 py-3 px-1">
@@ -40,10 +36,12 @@ export function TaskItem({ task, linkToEdit = true }: { task: Task; linkToEdit?:
       <div className="flex-1 min-w-0">
         {linkToEdit ? (
           <Link href={`/tasks/${task.id}`} className="block">
-            {Title}
+            <p className={`${titleClass} hover:text-primary transition-colors`}>
+              {task.title}
+            </p>
           </Link>
         ) : (
-          Title
+          <p className={titleClass}>{task.title}</p>
         )}
         <div className="flex items-center gap-2 mt-0.5">
           <span className={`text-xs ${due.overdue ? "text-danger font-medium" : "text-muted"}`}>

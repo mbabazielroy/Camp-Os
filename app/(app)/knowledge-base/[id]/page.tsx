@@ -4,7 +4,7 @@ import { updateKnowledgeEntry, deleteKnowledgeEntry } from "../actions";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Card } from "@/components/ui/Card";
 import { Input, Textarea, Select, Label } from "@/components/ui/Field";
-import { Button } from "@/components/ui/Button";
+import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { SubmitButton } from "@/components/ui/SubmitButton";
 import { KNOWLEDGE_CATEGORY_LABELS } from "@/lib/labels";
 
@@ -59,9 +59,9 @@ export default async function KnowledgeEntryPage({
       </Card>
 
       <form action={deleteWithId} className="mt-4">
-        <Button type="submit" variant="danger" size="sm">
+        <ConfirmButton confirmMessage="Delete this knowledge base entry? The AI will no longer be able to use it when drafting replies.">
           Delete entry
-        </Button>
+        </ConfirmButton>
       </form>
     </div>
   );

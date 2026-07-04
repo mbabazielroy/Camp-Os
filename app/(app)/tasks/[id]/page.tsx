@@ -4,7 +4,8 @@ import { updateTask, deleteTask } from "../actions";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Card } from "@/components/ui/Card";
 import { Input, Textarea, Select, Label } from "@/components/ui/Field";
-import { Button } from "@/components/ui/Button";
+import { ConfirmButton } from "@/components/ui/ConfirmButton";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import { TASK_PRIORITY_LABELS } from "@/lib/labels";
 
 export const dynamic = "force-dynamic";
@@ -64,15 +65,15 @@ export default async function TaskDetailPage({
             </div>
           </div>
           <div className="flex gap-3 pt-1">
-            <Button type="submit">Save changes</Button>
+            <SubmitButton pendingText="Saving...">Save changes</SubmitButton>
           </div>
         </form>
       </Card>
 
       <form action={deleteWithId} className="mt-4">
-        <Button type="submit" variant="danger" size="sm">
+        <ConfirmButton confirmMessage="Delete this task? This can't be undone.">
           Delete task
-        </Button>
+        </ConfirmButton>
       </form>
     </div>
   );

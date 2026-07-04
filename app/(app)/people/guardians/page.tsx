@@ -6,15 +6,26 @@ import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Input, Textarea, Label } from "@/components/ui/Field";
 import { SubmitButton } from "@/components/ui/SubmitButton";
+import { SearchBox } from "@/components/people/SearchBox";
 
 export const dynamic = "force-dynamic";
 
-export default async function GuardiansPage() {
+export default async function GuardiansPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const { q } = await searchParams;
   const supabase = await createClient();
-  const { data: guardians } = await supabase
-    .from("guardians")
-    .select("*")
-    .order("last_name", { ascending: true });
+
+  let query = supabase.from("guardians").select("*").order("last_name", { ascending: true });
+  if (q?.trim()) {
+    const term = q.trim().replaceAll("%", "").replaceAll(",", "");
+    query = query.or(
+      `first_name.ilike.%${term}%,last_name.ilike.%${term}%,email.ilike.%${term}%`
+    );
+  }
+  const { data: guardians } = await query;
 
   return (
     <div>
@@ -54,6 +65,8 @@ export default async function GuardiansPage() {
         </form>
       </Card>
 
+      <SearchBox placeholder="Search guardians by name or email..." defaultValue={q} />
+
       <Card className="px-3">
         {guardians && guardians.length > 0 ? (
           <div className="divide-y divide-border">
@@ -78,7 +91,10 @@ export default async function GuardiansPage() {
           </div>
         ) : (
           <div className="py-6">
-            <EmptyState title="No guardians yet" description="Add your first guardian above." />
+            <EmptyState
+              title={q ? "No guardians match your search" : "No guardians yet"}
+              description={q ? "Try a different name or email." : "Add your first guardian above."}
+            />
           </div>
         )}
       </Card>

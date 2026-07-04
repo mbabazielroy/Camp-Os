@@ -5,6 +5,17 @@
 
 create extension if not exists "pgcrypto";
 
+-- Keep updated_at accurate automatically on every update.
+create or replace function public.set_updated_at()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
 -- ---------------------------------------------------------------------------
 -- profiles: one row per director, created automatically on signup
 -- ---------------------------------------------------------------------------
@@ -66,6 +77,11 @@ create policy "Tasks are managed by owner" on public.tasks
 create index if not exists tasks_user_id_idx on public.tasks (user_id);
 create index if not exists tasks_due_date_idx on public.tasks (due_date);
 
+drop trigger if exists tasks_set_updated_at on public.tasks;
+create trigger tasks_set_updated_at
+  before update on public.tasks
+  for each row execute procedure public.set_updated_at();
+
 -- ---------------------------------------------------------------------------
 -- knowledge_base: camp rules, pickup times, packing lists, policies
 -- ---------------------------------------------------------------------------
@@ -87,6 +103,11 @@ create policy "Knowledge base is managed by owner" on public.knowledge_base
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
 create index if not exists knowledge_base_user_id_idx on public.knowledge_base (user_id);
+
+drop trigger if exists knowledge_base_set_updated_at on public.knowledge_base;
+create trigger knowledge_base_set_updated_at
+  before update on public.knowledge_base
+  for each row execute procedure public.set_updated_at();
 
 -- ---------------------------------------------------------------------------
 -- guardians: parent / guardian contact records
@@ -110,6 +131,11 @@ create policy "Guardians are managed by owner" on public.guardians
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
 create index if not exists guardians_user_id_idx on public.guardians (user_id);
+
+drop trigger if exists guardians_set_updated_at on public.guardians;
+create trigger guardians_set_updated_at
+  before update on public.guardians
+  for each row execute procedure public.set_updated_at();
 
 -- ---------------------------------------------------------------------------
 -- campers: basic camper records, optionally linked to a guardian
@@ -135,6 +161,11 @@ create policy "Campers are managed by owner" on public.campers
 create index if not exists campers_user_id_idx on public.campers (user_id);
 create index if not exists campers_guardian_id_idx on public.campers (guardian_id);
 
+drop trigger if exists campers_set_updated_at on public.campers;
+create trigger campers_set_updated_at
+  before update on public.campers
+  for each row execute procedure public.set_updated_at();
+
 -- ---------------------------------------------------------------------------
 -- staff: basic staff records
 -- ---------------------------------------------------------------------------
@@ -157,6 +188,11 @@ create policy "Staff are managed by owner" on public.staff
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
 create index if not exists staff_user_id_idx on public.staff (user_id);
+
+drop trigger if exists staff_set_updated_at on public.staff;
+create trigger staff_set_updated_at
+  before update on public.staff
+  for each row execute procedure public.set_updated_at();
 
 -- ---------------------------------------------------------------------------
 -- email_drafts: pasted-in emails, AI categorization, and AI-drafted replies.
@@ -188,3 +224,8 @@ create policy "Email drafts are managed by owner" on public.email_drafts
 
 create index if not exists email_drafts_user_id_idx on public.email_drafts (user_id);
 create index if not exists email_drafts_status_idx on public.email_drafts (status);
+
+drop trigger if exists email_drafts_set_updated_at on public.email_drafts;
+create trigger email_drafts_set_updated_at
+  before update on public.email_drafts
+  for each row execute procedure public.set_updated_at();

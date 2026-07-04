@@ -73,10 +73,12 @@ export default async function KnowledgeBasePage() {
       </Card>
 
       {grouped.length === 0 ? (
-        <EmptyState
-          title="Your knowledge base is empty"
-          description="Add pickup times, packing lists, and camp policies above so the AI can draft accurate replies."
-        />
+        <Card>
+          <EmptyState
+            title="Your knowledge base is empty"
+            description="Add pickup times, packing lists, and camp policies above so the AI can draft accurate replies."
+          />
+        </Card>
       ) : (
         <div className="space-y-6">
           {grouped.map(({ category, items }) => (

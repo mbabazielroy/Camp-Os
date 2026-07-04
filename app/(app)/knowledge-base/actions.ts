@@ -34,25 +34,27 @@ export async function createKnowledgeEntry(formData: FormData) {
 }
 
 export async function updateKnowledgeEntry(id: string, formData: FormData) {
-  const { supabase } = await requireUser();
+  const { supabase, user } = await requireUser();
 
   const title = String(formData.get("title") ?? "").trim();
   const content = String(formData.get("content") ?? "").trim();
+  if (!title || !content) return;
   const category = (String(formData.get("category") ?? "other") as KnowledgeCategory) || "other";
 
   await supabase
     .from("knowledge_base")
-    .update({ title, content, category, updated_at: new Date().toISOString() })
-    .eq("id", id);
+    .update({ title, content, category })
+    .eq("id", id)
+    .eq("user_id", user.id);
 
   revalidatePath("/knowledge-base");
   redirect("/knowledge-base");
 }
 
 export async function deleteKnowledgeEntry(id: string) {
-  const { supabase } = await requireUser();
+  const { supabase, user } = await requireUser();
 
-  await supabase.from("knowledge_base").delete().eq("id", id);
+  await supabase.from("knowledge_base").delete().eq("id", id).eq("user_id", user.id);
 
   revalidatePath("/knowledge-base");
   redirect("/knowledge-base");

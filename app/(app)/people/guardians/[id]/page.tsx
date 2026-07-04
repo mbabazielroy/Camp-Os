@@ -4,7 +4,7 @@ import { updateGuardian, deleteGuardian } from "../../actions";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Card } from "@/components/ui/Card";
 import { Input, Textarea, Label } from "@/components/ui/Field";
-import { Button } from "@/components/ui/Button";
+import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { SubmitButton } from "@/components/ui/SubmitButton";
 
 export const dynamic = "force-dynamic";
@@ -68,9 +68,9 @@ export default async function GuardianDetailPage({
       </Card>
 
       <form action={deleteWithId} className="mt-4">
-        <Button type="submit" variant="danger" size="sm">
+        <ConfirmButton confirmMessage="Delete this guardian record? Campers linked to them will keep their record but lose the link.">
           Delete guardian
-        </Button>
+        </ConfirmButton>
       </form>
     </div>
   );
