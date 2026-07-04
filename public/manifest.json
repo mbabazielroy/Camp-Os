@@ -1,11 +1,11 @@
 {
-  "name": "CampFlow Admin",
-  "short_name": "CampFlow",
-  "description": "AI administrative assistant for camp directors.",
+  "name": "Mill Stream Camp Office",
+  "short_name": "Mill Stream",
+  "description": "AI administrative assistant for Mill Stream Bible Camp.",
   "start_url": "/dashboard",
   "display": "standalone",
-  "background_color": "#faf7f2",
-  "theme_color": "#2f5233",
+  "background_color": "#f4f6f4",
+  "theme_color": "#14586b",
   "orientation": "portrait",
   "icons": [
     {

@@ -1,30 +1,45 @@
 @import "tailwindcss";
 
+/*
+  Mill Stream theme - river blues and forest greens for a camp on the
+  Pigeon River. All brand colors live in this block: swap in exact brand
+  hex codes here and the whole app follows.
+*/
 :root {
-  --background: #f7f4ed;
-  --foreground: #292420;
+  --background: #f4f6f4;
+  --foreground: #1d2b2a;
 
-  --color-surface: #fffdf9;
-  --color-surface-muted: #f1ece1;
-  --color-border: #e6ded0;
+  --color-surface: #fdfefd;
+  --color-surface-muted: #e9efec;
+  --color-border: #d9e3de;
 
-  --color-primary: #33582f;
-  --color-primary-hover: #274622;
-  --color-primary-soft: #e4eedd;
+  /* Primary: deep stream teal */
+  --color-primary: #14586b;
+  --color-primary-hover: #0e4453;
+  --color-primary-soft: #dcebee;
 
-  --color-accent: #c07230;
-  --color-accent-soft: #f8e8d5;
+  /* Secondary: forest green (used in gradients and accents) */
+  --color-forest: #3c7146;
+  --color-forest-soft: #e0eddf;
 
-  --color-danger: #ae432c;
-  --color-danger-soft: #f8e3dc;
+  /* Accent: campfire amber */
+  --color-accent: #d98d2b;
+  --color-accent-soft: #f9ecd7;
 
-  --color-warning: #97701c;
-  --color-warning-soft: #f5ecd3;
+  --color-danger: #b3452c;
+  --color-danger-soft: #f8e4dd;
 
-  --color-muted: #766a5c;
+  --color-warning: #a8791b;
+  --color-warning-soft: #f6ecd6;
 
-  --shadow-card: 0 1px 2px rgb(41 36 32 / 0.04), 0 2px 8px rgb(41 36 32 / 0.04);
-  --shadow-card-hover: 0 2px 4px rgb(41 36 32 / 0.06), 0 6px 16px rgb(41 36 32 / 0.08);
+  --color-muted: #5d6f6b;
+
+  /* The "stream" gradient: forest -> teal, like woods meeting water */
+  --gradient-stream: linear-gradient(135deg, #3c7146 0%, #1d6a70 55%, #14586b 100%);
+
+  --shadow-card: 0 1px 2px rgb(20 45 50 / 0.05), 0 2px 10px rgb(20 45 50 / 0.05);
+  --shadow-card-hover: 0 2px 4px rgb(20 45 50 / 0.07), 0 8px 20px rgb(20 45 50 / 0.1);
+  --shadow-dock: 0 4px 24px rgb(20 45 50 / 0.16);
 }
 
 @theme inline {
@@ -36,6 +51,8 @@
   --color-primary: var(--color-primary);
   --color-primary-hover: var(--color-primary-hover);
   --color-primary-soft: var(--color-primary-soft);
+  --color-forest: var(--color-forest);
+  --color-forest-soft: var(--color-forest-soft);
   --color-accent: var(--color-accent);
   --color-accent-soft: var(--color-accent-soft);
   --color-danger: var(--color-danger);
@@ -47,6 +64,7 @@
   --font-mono: var(--font-geist-mono);
   --shadow-card: var(--shadow-card);
   --shadow-card-hover: var(--shadow-card-hover);
+  --shadow-dock: var(--shadow-dock);
 }
 
 body {
@@ -63,6 +81,10 @@ body {
 
 ::selection {
   background: var(--color-primary-soft);
+}
+
+.bg-stream {
+  background: var(--gradient-stream);
 }
 
 @keyframes shimmer {

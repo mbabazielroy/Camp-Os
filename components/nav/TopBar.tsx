@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { signOut } from "@/app/login/actions";
+import { BrandMark } from "@/components/Brand";
 import { LogOut, Settings } from "lucide-react";
 
 export function TopBar({ campName }: { campName: string | null }) {
@@ -9,12 +10,10 @@ export function TopBar({ campName }: { campName: string | null }) {
       style={{ paddingTop: "env(safe-area-inset-top)" }}
     >
       <div className="flex items-center gap-2.5 h-14">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-white text-sm font-semibold">
-          C
-        </div>
+        <BrandMark size="sm" />
         <div>
-          <p className="text-sm font-semibold text-foreground leading-tight">
-            {campName ?? "CampFlow"}
+          <p className="text-sm font-semibold text-foreground leading-tight tracking-tight">
+            {campName ?? "Mill Stream"}
           </p>
         </div>
       </div>

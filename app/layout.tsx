@@ -14,13 +14,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CampFlow Admin",
+  title: "Mill Stream Camp Office",
   description: "The camp director's calm administrative assistant.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "CampFlow",
+    title: "Mill Stream",
   },
   icons: {
     icon: [
@@ -35,7 +35,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  themeColor: "#2f5233",
+  themeColor: "#14586b",
 };
 
 export default function RootLayout({

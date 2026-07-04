@@ -39,7 +39,7 @@ export default async function AppLayout({
       <Sidebar campName={campName} email={user.email ?? null} />
       <div className="flex-1 flex flex-col min-w-0">
         <TopBar campName={campName} />
-        <main className="flex-1 px-4 py-5 md:px-8 md:py-8 pb-24 md:pb-8 max-w-3xl w-full mx-auto md:mx-0">
+        <main className="flex-1 px-4 py-5 md:px-8 md:py-8 pb-28 md:pb-8 max-w-3xl w-full mx-auto md:mx-0">
           {children}
         </main>
       </div>

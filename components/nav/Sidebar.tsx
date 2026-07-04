@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NAV_ITEMS } from "./nav-items";
 import { signOut } from "@/app/login/actions";
+import { BrandMark } from "@/components/Brand";
 import { LogOut, Settings } from "lucide-react";
 
 export function Sidebar({
@@ -19,12 +20,12 @@ export function Sidebar({
     <aside className="hidden md:flex md:w-60 md:flex-col md:border-r md:border-border md:bg-surface md:h-screen md:sticky md:top-0">
       <div className="px-5 pt-6 pb-4">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-white font-semibold">
-            C
-          </div>
+          <BrandMark size="md" />
           <div>
-            <p className="font-semibold text-foreground leading-tight">CampFlow</p>
-            <p className="text-xs text-muted leading-tight">{campName ?? "Admin"}</p>
+            <p className="font-semibold text-foreground leading-tight tracking-tight">
+              {campName ?? "Mill Stream"}
+            </p>
+            <p className="text-xs text-muted leading-tight">Camp office</p>
           </div>
         </div>
       </div>

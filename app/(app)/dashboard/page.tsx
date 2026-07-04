@@ -134,7 +134,7 @@ export default async function DashboardPage() {
   return (
     <div>
       {/* Hero */}
-      <div className="relative overflow-hidden rounded-2xl bg-primary text-white p-5 md:p-6 mb-5 shadow-card">
+      <div className="relative overflow-hidden rounded-3xl bg-stream text-white p-5 md:p-6 mb-5 shadow-card">
         <div
           className="absolute -right-10 -top-14 h-44 w-44 rounded-full bg-white/10"
           aria-hidden
@@ -143,6 +143,21 @@ export default async function DashboardPage() {
           className="absolute -right-2 top-16 h-24 w-24 rounded-full bg-white/10"
           aria-hidden
         />
+        <svg
+          className="absolute bottom-0 inset-x-0 w-full text-white/10"
+          viewBox="0 0 400 40"
+          preserveAspectRatio="none"
+          aria-hidden
+        >
+          <path
+            d="M0 25 Q 50 10, 100 25 T 200 25 T 300 25 T 400 25 V 40 H 0 Z"
+            fill="currentColor"
+          />
+          <path
+            d="M0 32 Q 50 20, 100 32 T 200 32 T 300 32 T 400 32 V 40 H 0 Z"
+            fill="currentColor"
+          />
+        </svg>
         <div className="relative">
           <p className="flex items-center gap-1.5 text-sm text-white/80">
             <Sun size={15} />
@@ -285,7 +300,7 @@ export default async function DashboardPage() {
               <p className="text-3xl font-semibold text-foreground">
                 {pendingEmailCount ?? 0}
               </p>
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent-soft text-accent">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-forest-soft text-forest">
                 <Mail size={18} />
               </span>
             </div>
