@@ -1,0 +1,31 @@
+{
+  "expo": {
+    "name": "Mill Stream",
+    "slug": "millstream-camp-office",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#f4f6f4",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#14586b"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "camp.millstream.office"
+    },
+    "android": {
+      "package": "camp.millstream.office",
+      "adaptiveIcon": {
+        "backgroundColor": "#14586b",
+        "foregroundImage": "./assets/android-icon-foreground.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}

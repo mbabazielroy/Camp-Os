@@ -1,0 +1,106 @@
+@import "tailwindcss";
+
+/*
+  Mill Stream theme - river blues and forest greens for a camp on the
+  Pigeon River. All brand colors live in this block: swap in exact brand
+  hex codes here and the whole app follows.
+*/
+:root {
+  --background: #f4f6f4;
+  --foreground: #1d2b2a;
+
+  --color-surface: #fdfefd;
+  --color-surface-muted: #e9efec;
+  --color-border: #d9e3de;
+
+  /* Primary: deep stream teal */
+  --color-primary: #14586b;
+  --color-primary-hover: #0e4453;
+  --color-primary-soft: #dcebee;
+
+  /* Secondary: forest green (used in gradients and accents) */
+  --color-forest: #3c7146;
+  --color-forest-soft: #e0eddf;
+
+  /* Accent: campfire amber */
+  --color-accent: #d98d2b;
+  --color-accent-soft: #f9ecd7;
+
+  --color-danger: #b3452c;
+  --color-danger-soft: #f8e4dd;
+
+  --color-warning: #a8791b;
+  --color-warning-soft: #f6ecd6;
+
+  --color-muted: #5d6f6b;
+
+  /* The "stream" gradient: forest -> teal, like woods meeting water */
+  --gradient-stream: linear-gradient(135deg, #3c7146 0%, #1d6a70 55%, #14586b 100%);
+
+  --shadow-card: 0 1px 2px rgb(20 45 50 / 0.05), 0 2px 10px rgb(20 45 50 / 0.05);
+  --shadow-card-hover: 0 2px 4px rgb(20 45 50 / 0.07), 0 8px 20px rgb(20 45 50 / 0.1);
+  --shadow-dock: 0 4px 24px rgb(20 45 50 / 0.16);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--color-surface);
+  --color-surface-muted: var(--color-surface-muted);
+  --color-border: var(--color-border);
+  --color-primary: var(--color-primary);
+  --color-primary-hover: var(--color-primary-hover);
+  --color-primary-soft: var(--color-primary-soft);
+  --color-forest: var(--color-forest);
+  --color-forest-soft: var(--color-forest-soft);
+  --color-accent: var(--color-accent);
+  --color-accent-soft: var(--color-accent-soft);
+  --color-danger: var(--color-danger);
+  --color-danger-soft: var(--color-danger-soft);
+  --color-warning: var(--color-warning);
+  --color-warning-soft: var(--color-warning-soft);
+  --color-muted: var(--color-muted);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --shadow-card: var(--shadow-card);
+  --shadow-card-hover: var(--shadow-card-hover);
+  --shadow-dock: var(--shadow-dock);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  font-feature-settings: "cv11", "ss01";
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: var(--color-primary-soft);
+}
+
+.bg-stream {
+  background: var(--gradient-stream);
+}
+
+@keyframes shimmer {
+  0% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.55;
+  }
+}
+
+.skeleton {
+  border-radius: 0.75rem;
+  background: var(--color-surface-muted);
+  animation: shimmer 1.6s ease-in-out infinite;
+}

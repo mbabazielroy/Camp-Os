@@ -1,0 +1,103 @@
+import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
+import { createGuardian } from "../actions";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Card } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Input, Textarea, Label } from "@/components/ui/Field";
+import { SubmitButton } from "@/components/ui/SubmitButton";
+import { SearchBox } from "@/components/people/SearchBox";
+
+export const dynamic = "force-dynamic";
+
+export default async function GuardiansPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const { q } = await searchParams;
+  const supabase = await createClient();
+
+  let query = supabase.from("guardians").select("*").order("last_name", { ascending: true });
+  if (q?.trim()) {
+    const term = q.trim().replaceAll("%", "").replaceAll(",", "");
+    query = query.or(
+      `first_name.ilike.%${term}%,last_name.ilike.%${term}%,email.ilike.%${term}%`
+    );
+  }
+  const { data: guardians } = await query;
+
+  return (
+    <div>
+      <PageHeader title="Guardians" description="Parent and guardian contact records." />
+
+      <Card className="p-4 mb-6">
+        <form action={createGuardian} className="space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="first_name">First name</Label>
+              <Input id="first_name" name="first_name" required />
+            </div>
+            <div>
+              <Label htmlFor="last_name">Last name</Label>
+              <Input id="last_name" name="last_name" required />
+            </div>
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" name="email" type="email" />
+            </div>
+            <div>
+              <Label htmlFor="phone">Phone</Label>
+              <Input id="phone" name="phone" type="tel" />
+            </div>
+            <div className="col-span-2">
+              <Label htmlFor="relationship">Relationship</Label>
+              <Input id="relationship" name="relationship" placeholder="Mother, Father, Guardian..." />
+            </div>
+          </div>
+          <div>
+            <Label htmlFor="notes">Notes</Label>
+            <Textarea id="notes" name="notes" rows={2} />
+          </div>
+          <SubmitButton pendingText="Saving..." className="w-full sm:w-auto">
+            Add guardian
+          </SubmitButton>
+        </form>
+      </Card>
+
+      <SearchBox placeholder="Search guardians by name or email..." defaultValue={q} />
+
+      <Card className="px-3">
+        {guardians && guardians.length > 0 ? (
+          <div className="divide-y divide-border">
+            {guardians.map((guardian) => (
+              <Link
+                key={guardian.id}
+                href={`/people/guardians/${guardian.id}`}
+                className="flex items-center justify-between gap-3 py-3 px-1"
+              >
+                <div className="min-w-0">
+                  <p className="font-medium text-foreground truncate">
+                    {guardian.first_name} {guardian.last_name}
+                  </p>
+                  <p className="text-sm text-muted truncate">
+                    {[guardian.relationship, guardian.phone, guardian.email]
+                      .filter(Boolean)
+                      .join(" · ") || "No contact info on file"}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="py-6">
+            <EmptyState
+              title={q ? "No guardians match your search" : "No guardians yet"}
+              description={q ? "Try a different name or email." : "Add your first guardian above."}
+            />
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}
