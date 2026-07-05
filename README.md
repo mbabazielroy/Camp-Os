@@ -61,6 +61,30 @@ edit, and approve it. Even with Gmail connected, approved replies land in your G
    Open [http://localhost:3000](http://localhost:3000) - you'll land on the login page,
    where you can create an account (which creates your camp).
 
+## Testing on your phone
+
+**Option A - browser (no install):** run `npm run dev:lan`, find your computer's IP
+(`ipconfig` on Windows, `ifconfig` on Mac), and open `http://<that-ip>:3000` on your phone
+(same Wi-Fi). Use "Add to Home Screen" for the full-screen PWA experience.
+
+**Option B - Expo Go:** a native shell for the app lives in `mobile/`.
+
+```bash
+# terminal 1 - web app, listening on the network
+npm run dev:lan
+
+# terminal 2 - the Expo shell
+cd mobile
+npm install
+cp .env.example .env   # then edit .env: set EXPO_PUBLIC_APP_URL to http://<your-ip>:3000
+npx expo start
+```
+
+Install the **Expo Go** app on your phone, scan the QR code from the terminal, and the
+app opens natively with the Mill Stream splash screen. Point `EXPO_PUBLIC_APP_URL` at your
+deployed URL instead to test production. The same `mobile/` project is the starting point
+for real App Store / Play Store builds later (via `eas build`).
+
 ## Project structure
 
 - `app/login` - sign in / sign up (signup auto-creates a camp or accepts an invite)
