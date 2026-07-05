@@ -4,11 +4,12 @@ import {
   ActivityIndicator,
   BackHandler,
   Platform,
-  SafeAreaView,
+  Pressable,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 
 // Where the CampFlow / Mill Stream web app is running.
@@ -23,16 +24,44 @@ const BACKGROUND = '#f4f6f4';
 
 function SetupScreen() {
   return (
-    <View style={styles.setup}>
-      <Text style={styles.setupTitle}>Almost there</Text>
-      <Text style={styles.setupText}>
+    <View style={styles.message}>
+      <Text style={styles.messageTitle}>Almost there</Text>
+      <Text style={styles.messageText}>
         Tell the app where the web server is running. Create mobile/.env with:
       </Text>
-      <Text style={styles.setupCode}>EXPO_PUBLIC_APP_URL=http://YOUR-COMPUTER-IP:3000</Text>
-      <Text style={styles.setupText}>
+      <Text style={styles.messageCode}>EXPO_PUBLIC_APP_URL=http://YOUR-COMPUTER-IP:3000</Text>
+      <Text style={styles.messageText}>
         Find your computer&apos;s IP with `ipconfig` (Windows) or `ifconfig` (Mac), run `npm
-        run dev:lan` at the repo root, then restart `npx expo start`.
+        run dev:lan` at the repo root, then restart with `npx expo start --clear`.
       </Text>
+    </View>
+  );
+}
+
+function ErrorScreen({
+  url,
+  detail,
+  onRetry,
+}: {
+  url: string;
+  detail: string | null;
+  onRetry: () => void;
+}) {
+  return (
+    <View style={styles.message}>
+      <Text style={styles.messageTitle}>Can&apos;t reach the web app</Text>
+      <Text style={styles.messageText}>The app tried to load:</Text>
+      <Text style={styles.messageCode}>{url}</Text>
+      {detail ? <Text style={styles.messageDetail}>{detail}</Text> : null}
+      <Text style={styles.messageText}>
+        Check that: the web server is running (`npm run dev:lan` at the repo root), your
+        phone is on the same Wi-Fi as the computer, the IP address is right, and Windows
+        Firewall allows port 3000. Test the same URL in your phone&apos;s browser - if it
+        fails there too, it&apos;s the connection, not this app.
+      </Text>
+      <Pressable style={styles.retryButton} onPress={onRetry}>
+        <Text style={styles.retryLabel}>Try again</Text>
+      </Pressable>
     </View>
   );
 }
@@ -41,6 +70,8 @@ export default function App() {
   const webViewRef = useRef<WebView>(null);
   const canGoBackRef = useRef(false);
   const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
 
   // Android hardware back navigates the web app's history first.
   useEffect(() => {
@@ -55,40 +86,56 @@ export default function App() {
     return () => sub.remove();
   }, []);
 
+  const retry = () => {
+    setError(null);
+    setLoaded(false);
+    setAttempt((n) => n + 1);
+  };
+
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar style="light" />
-      {APP_URL ? (
-        <View style={styles.container}>
-          <WebView
-            ref={webViewRef}
-            source={{ uri: APP_URL }}
-            style={styles.webview}
-            onLoadEnd={() => setLoaded(true)}
-            onNavigationStateChange={(navState) => {
-              canGoBackRef.current = navState.canGoBack;
-            }}
-            allowsBackForwardNavigationGestures
-            pullToRefreshEnabled
-            domStorageEnabled
-            sharedCookiesEnabled
-            startInLoadingState
-            renderLoading={() => (
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+        <StatusBar style="light" />
+        {!APP_URL ? (
+          <SetupScreen />
+        ) : error ? (
+          <ErrorScreen url={APP_URL} detail={error} onRetry={retry} />
+        ) : (
+          <View style={styles.container}>
+            <WebView
+              key={attempt}
+              ref={webViewRef}
+              source={{ uri: APP_URL }}
+              style={styles.webview}
+              onLoadEnd={() => setLoaded(true)}
+              onError={(e) => setError(e.nativeEvent.description || 'The page failed to load.')}
+              onHttpError={(e) =>
+                setError(`The server responded with HTTP ${e.nativeEvent.statusCode}.`)
+              }
+              onNavigationStateChange={(navState) => {
+                canGoBackRef.current = navState.canGoBack;
+              }}
+              allowsBackForwardNavigationGestures
+              pullToRefreshEnabled
+              domStorageEnabled
+              sharedCookiesEnabled
+              startInLoadingState
+              renderLoading={() => (
+                <View style={styles.loading}>
+                  <ActivityIndicator size="large" color={STREAM_TEAL} />
+                </View>
+              )}
+            />
+            {!loaded && (
               <View style={styles.loading}>
                 <ActivityIndicator size="large" color={STREAM_TEAL} />
+                <Text style={styles.loadingText}>Connecting to {APP_URL}...</Text>
               </View>
             )}
-          />
-          {!loaded && (
-            <View style={styles.loading}>
-              <ActivityIndicator size="large" color={STREAM_TEAL} />
-            </View>
-          )}
-        </View>
-      ) : (
-        <SetupScreen />
-      )}
-    </SafeAreaView>
+          </View>
+        )}
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
@@ -113,9 +160,14 @@ const styles = StyleSheet.create({
     bottom: 0,
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 12,
     backgroundColor: BACKGROUND,
   },
-  setup: {
+  loadingText: {
+    fontSize: 13,
+    color: '#5d6f6b',
+  },
+  message: {
     flex: 1,
     backgroundColor: BACKGROUND,
     alignItems: 'center',
@@ -123,18 +175,23 @@ const styles = StyleSheet.create({
     padding: 28,
     gap: 12,
   },
-  setupTitle: {
+  messageTitle: {
     fontSize: 22,
     fontWeight: '600',
     color: '#1d2b2a',
   },
-  setupText: {
+  messageText: {
     fontSize: 14,
     color: '#5d6f6b',
     textAlign: 'center',
     lineHeight: 21,
   },
-  setupCode: {
+  messageDetail: {
+    fontSize: 12,
+    color: '#b3452c',
+    textAlign: 'center',
+  },
+  messageCode: {
     fontFamily: Platform.select({ ios: 'Menlo', android: 'monospace' }),
     fontSize: 12,
     color: '#14586b',
@@ -143,5 +200,19 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 8,
     overflow: 'hidden',
+  },
+  retryButton: {
+    marginTop: 4,
+    backgroundColor: STREAM_TEAL,
+    paddingHorizontal: 22,
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  retryLabel: {
+    color: '#ffffff',
+    fontSize: 15,
+    fontWeight: '600',
   },
 });
