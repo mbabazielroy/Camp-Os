@@ -1,9 +1,24 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { isSupabaseConfigured } from "@/lib/env";
 
-const PUBLIC_PATHS = ["/login", "/auth"];
+const PUBLIC_PATHS = ["/login", "/auth", "/setup"];
 
 export async function updateSession(request: NextRequest) {
+  const path = request.nextUrl.pathname;
+
+  // Without credentials every page would crash while creating a Supabase
+  // client, so send people to a page that explains what is missing instead.
+  if (!isSupabaseConfigured()) {
+    if (path.startsWith("/setup")) {
+      return NextResponse.next({ request });
+    }
+    const setupUrl = request.nextUrl.clone();
+    setupUrl.pathname = "/setup";
+    setupUrl.search = "";
+    return NextResponse.redirect(setupUrl);
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -29,7 +44,6 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const path = request.nextUrl.pathname;
   const isPublicPath = PUBLIC_PATHS.some((p) => path.startsWith(p));
 
   if (!user && !isPublicPath && path !== "/") {
