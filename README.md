@@ -63,27 +63,34 @@ edit, and approve it. Even with Gmail connected, approved replies land in your G
 
 ## Testing on your phone
 
-**Option A - browser (no install):** run `npm run dev:lan`, find your computer's IP
-(`ipconfig` on Windows, `ifconfig` on Mac), and open `http://<that-ip>:3000` on your phone
-(same Wi-Fi). Use "Add to Home Screen" for the full-screen PWA experience.
-
-**Option B - Expo Go:** a native shell for the app lives in `mobile/`.
+**Option A - scan and go (no install).** Two terminals:
 
 ```bash
-# terminal 1 - web app, listening on the network
-npm run dev:lan
+npm run dev:lan   # terminal 1 - serves the app on your Wi-Fi network
+npm run phone     # terminal 2 - prints the address and a QR code
+```
 
-# terminal 2 - the Expo shell
-cd mobile
+Scan the QR with your phone's **camera app**. It finds your computer's IP for you, warns
+you if the dev server isn't running, and prints the Windows Firewall fix if you need it.
+"Add to Home Screen" makes it behave like an installed app.
+
+**Option B - Expo Go.** A native shell lives in `mobile/`:
+
+```bash
+npm run dev:lan        # terminal 1, project root
+
+cd mobile              # terminal 2
 npm install
-cp .env.example .env   # then edit .env: set EXPO_PUBLIC_APP_URL to http://<your-ip>:3000
 npx expo start
 ```
 
-Install the **Expo Go** app on your phone, scan the QR code from the terminal, and the
-app opens natively with the Mill Stream splash screen. Point `EXPO_PUBLIC_APP_URL` at your
-deployed URL instead to test production. The same `mobile/` project is the starting point
-for real App Store / Play Store builds later (via `eas build`).
+Scan that QR with **Expo Go**. No IP configuration needed - the app derives the web
+server's address from the host Expo served it from, and if that guess is wrong it shows a
+screen where you type the address on the phone and it remembers it.
+
+See [`mobile/README.md`](mobile/README.md) for troubleshooting (firewall, tunnel mode,
+Expo Go version mismatches, Windows `node_modules` errors) and for building a real
+App Store / Play Store app with `eas build`.
 
 ## Project structure
 
