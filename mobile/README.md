@@ -41,7 +41,41 @@ EXPO_PUBLIC_APP_URL=https://your-deployed-app.example.com
 `EXPO_PUBLIC_*` values are baked in when the bundle is built, so restart with
 `npx expo start --clear` after changing them. An address typed on the phone overrides it.
 
+## Running in GitHub Codespaces (or Gitpod)
+
+There is no LAN between your phone and a cloud dev environment, so the rules are
+different: each port is published as its own public HTTPS address.
+
+**Easiest path - no Expo at all:**
+
+1. `npm run dev:lan` in the project root.
+2. In the **PORTS** tab (next to TERMINAL), right-click port **3000** → *Port Visibility* →
+   **Public**. While it is private, your phone only gets a GitHub login page.
+3. `npm run phone` - it detects Codespaces and prints the public `https://…-3000.app.github.dev`
+   address plus a QR code. Scan it with the phone camera.
+
+**With Expo Go:** the address is worked out for you (`app.config.ts` builds it from the
+Codespace name), but Expo Go still has to download the bundle, and Metro's own port isn't
+reachable the normal way. Start it as a tunnel:
+
+```bash
+npm run start:tunnel
+```
+
+Make port 3000 public as above, then scan the tunnel QR with Expo Go.
+
 ## Troubleshooting
+
+### `Failed to load resource: 500` and "MIME type ('application/json') is not executable"
+
+Two things are happening, and neither is the camp app itself:
+
+- **The 500** is Metro failing to build the bundle. The real error is printed in the
+  terminal running `expo start` - read that line. The most common cause after pulling new
+  code is missing packages: run `npm install` in `mobile/`, then `npx expo start --clear`.
+- **The MIME warning** means a *browser* was pointed at Metro (port 8081). That port serves
+  a JavaScript bundle to Expo Go, not a web page - opening it in a browser can't work.
+  Open port **3000** in a browser (that's the web app), and give port 8081 to Expo Go only.
 
 ### The app opens but shows "Couldn't reach ..."
 

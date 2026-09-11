@@ -88,9 +88,13 @@ Scan that QR with **Expo Go**. No IP configuration needed - the app derives the 
 server's address from the host Expo served it from, and if that guess is wrong it shows a
 screen where you type the address on the phone and it remembers it.
 
-See [`mobile/README.md`](mobile/README.md) for troubleshooting (firewall, tunnel mode,
-Expo Go version mismatches, Windows `node_modules` errors) and for building a real
-App Store / Play Store app with `eas build`.
+**Running in GitHub Codespaces?** `npm run phone` detects it and prints the public
+forwarded address instead of a LAN one - just remember to set port 3000 to **Public** in
+the PORTS tab first, or your phone gets a login page.
+
+See [`mobile/README.md`](mobile/README.md) for troubleshooting (firewall, Codespaces,
+tunnel mode, Expo Go version mismatches, Windows `node_modules` errors) and for building a
+real App Store / Play Store app with `eas build`.
 
 ## Project structure
 

@@ -46,6 +46,11 @@ export default function App() {
   const [attempt, setAttempt] = useState(0);
 
   const detected = detectWebAppUrl();
+  // Cloud dev environments (Codespaces, Gitpod) fail for different reasons
+  // than a local machine, so the guidance below differs.
+  const isForwarded = /app\.github\.dev|githubpreview\.dev|gitpod\.(io|dev)/i.test(
+    `${url} ${detected ?? ''}`
+  );
 
   // Android hardware back navigates the web app's history first.
   useEffect(() => {
@@ -216,26 +221,47 @@ export default function App() {
                 ) : null}
 
                 <Text style={styles.checklistTitle}>If it still won&apos;t connect</Text>
-                <Text style={styles.checklistItem}>
-                  1. On your computer, run <Text style={styles.code}>npm run dev:lan</Text> in
-                  the project folder (not the mobile folder) and leave it running.
-                </Text>
-                <Text style={styles.checklistItem}>
-                  2. Phone and computer must be on the same Wi-Fi - not guest Wi-Fi, and not
-                  mobile data.
-                </Text>
-                <Text style={styles.checklistItem}>
-                  3. Windows Firewall blocks port 3000 by default. In an admin Command
-                  Prompt run:{' '}
-                  <Text style={styles.code}>
-                    netsh advfirewall firewall add rule name=&quot;Next dev
-                    3000&quot; dir=in action=allow protocol=TCP localport=3000
-                  </Text>
-                </Text>
-                <Text style={styles.checklistItem}>
-                  4. Open the same address in this phone&apos;s browser. If it fails there
-                  too, it&apos;s the network - not this app.
-                </Text>
+                {isForwarded ? (
+                  <>
+                    <Text style={styles.checklistItem}>
+                      1. In the dev environment, run{' '}
+                      <Text style={styles.code}>npm run dev:lan</Text> in the project folder
+                      (not the mobile folder) and leave it running.
+                    </Text>
+                    <Text style={styles.checklistItem}>
+                      2. Open the PORTS tab, right-click port 3000 and set Port Visibility
+                      to <Text style={styles.code}>Public</Text>. While it is private your
+                      phone gets a login page instead of the app.
+                    </Text>
+                    <Text style={styles.checklistItem}>
+                      3. Open the same address in this phone&apos;s browser to confirm it
+                      loads without asking you to sign in.
+                    </Text>
+                  </>
+                ) : (
+                  <>
+                    <Text style={styles.checklistItem}>
+                      1. On your computer, run <Text style={styles.code}>npm run dev:lan</Text>{' '}
+                      in the project folder (not the mobile folder) and leave it running.
+                    </Text>
+                    <Text style={styles.checklistItem}>
+                      2. Phone and computer must be on the same Wi-Fi - not guest Wi-Fi, and
+                      not mobile data.
+                    </Text>
+                    <Text style={styles.checklistItem}>
+                      3. Windows Firewall blocks port 3000 by default. In an admin Command
+                      Prompt run:{' '}
+                      <Text style={styles.code}>
+                        netsh advfirewall firewall add rule name=&quot;Next dev
+                        3000&quot; dir=in action=allow protocol=TCP localport=3000
+                      </Text>
+                    </Text>
+                    <Text style={styles.checklistItem}>
+                      4. Open the same address in this phone&apos;s browser. If it fails
+                      there too, it&apos;s the network - not this app.
+                    </Text>
+                  </>
+                )}
 
                 {detected ? (
                   <Text style={styles.footnote}>Metro is serving this app from {detected}</Text>

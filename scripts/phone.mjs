@@ -4,12 +4,37 @@
  * Scan it with the phone's camera - no Expo, no app install.
  *
  *   npm run phone
+ *
+ * Works both on a local machine (LAN address) and in a cloud dev environment
+ * like GitHub Codespaces or Gitpod (public forwarded HTTPS address).
  */
 import os from 'node:os';
 import net from 'node:net';
 import qrcode from 'qrcode-terminal';
 
 const PORT = Number(process.env.PORT ?? 3000);
+
+/** Cloud dev environments forward each port as its own public hostname. */
+function forwardedEnvironment() {
+  const codespace = process.env.CODESPACE_NAME;
+  const codespaceDomain = process.env.GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN;
+  if (codespace && codespaceDomain) {
+    return {
+      kind: 'GitHub Codespaces',
+      url: `https://${codespace}-${PORT}.${codespaceDomain}`,
+    };
+  }
+
+  const gitpod = process.env.GITPOD_WORKSPACE_URL;
+  if (gitpod) {
+    return {
+      kind: 'Gitpod',
+      url: gitpod.replace('https://', `https://${PORT}-`).replace(/\/+$/, ''),
+    };
+  }
+
+  return null;
+}
 
 function lanAddresses() {
   const found = [];
@@ -44,43 +69,61 @@ function isPortOpen(host, port, timeout = 1200) {
   });
 }
 
-const interfaces = lanAddresses();
-
-if (interfaces.length === 0) {
-  console.log('\nNo network connection found. Connect this computer to Wi-Fi and try again.\n');
-  process.exit(1);
-}
-
-const primary = interfaces[0];
-const url = `http://${primary.address}:${PORT}`;
-const serverUp = await isPortOpen(primary.address, PORT);
-
 console.log('\n  Mill Stream Camp Office - open on your phone\n');
-qrcode.generate(url, { small: true });
-console.log(`  ${url}\n`);
 
-if (serverUp) {
-  console.log('  The dev server is running. Scan the code with your phone camera.');
-  console.log('  Tip: in the browser menu choose "Add to Home Screen" for the app feel.\n');
-} else {
-  console.log(`  Nothing is listening on port ${PORT} yet.`);
-  console.log('  Open a second terminal and run:  npm run dev:lan\n');
-}
+const forwarded = forwardedEnvironment();
+const serverUp = await isPortOpen('127.0.0.1', PORT);
 
-if (interfaces.length > 1) {
-  console.log('  Other addresses on this computer (try these if the first one fails):');
-  for (const iface of interfaces.slice(1)) {
-    console.log(`    http://${iface.address}:${PORT}   (${iface.name})`);
+if (forwarded) {
+  qrcode.generate(forwarded.url, { small: true });
+  console.log(`  ${forwarded.url}\n`);
+  console.log(`  Detected ${forwarded.kind}. Your phone reaches this over the internet,`);
+  console.log('  so it does NOT need to be on the same network.\n');
+
+  if (!serverUp) {
+    console.log(`  Nothing is listening on port ${PORT} yet.`);
+    console.log('  In another terminal run:  npm run dev:lan\n');
   }
-  console.log('');
-}
 
-if (process.platform === 'win32') {
-  console.log('  If the phone cannot reach it, Windows Firewall is the usual cause.');
-  console.log('  Run once in an ADMIN Command Prompt:');
-  console.log(
-    `    netsh advfirewall firewall add rule name="Next dev ${PORT}" dir=in action=allow protocol=TCP localport=${PORT}\n`
-  );
-}
+  console.log('  IMPORTANT: the forwarded port must be public, or your phone will just');
+  console.log('  get a GitHub login page. In the PORTS tab (next to TERMINAL), right-click');
+  console.log(`  port ${PORT} -> Port Visibility -> Public.\n`);
+} else {
+  const interfaces = lanAddresses();
 
-console.log('  Phone and computer must be on the same Wi-Fi network.\n');
+  if (interfaces.length === 0) {
+    console.log('  No network connection found. Connect this computer to Wi-Fi and retry.\n');
+    process.exit(1);
+  }
+
+  const primary = interfaces[0];
+  const url = `http://${primary.address}:${PORT}`;
+  qrcode.generate(url, { small: true });
+  console.log(`  ${url}\n`);
+
+  if (serverUp) {
+    console.log('  The dev server is running. Scan the code with your phone camera.');
+    console.log('  Tip: in the browser menu choose "Add to Home Screen" for the app feel.\n');
+  } else {
+    console.log(`  Nothing is listening on port ${PORT} yet.`);
+    console.log('  Open a second terminal and run:  npm run dev:lan\n');
+  }
+
+  if (interfaces.length > 1) {
+    console.log('  Other addresses on this computer (try these if the first one fails):');
+    for (const iface of interfaces.slice(1)) {
+      console.log(`    http://${iface.address}:${PORT}   (${iface.name})`);
+    }
+    console.log('');
+  }
+
+  if (process.platform === 'win32') {
+    console.log('  If the phone cannot reach it, Windows Firewall is the usual cause.');
+    console.log('  Run once in an ADMIN Command Prompt:');
+    console.log(
+      `    netsh advfirewall firewall add rule name="Next dev ${PORT}" dir=in action=allow protocol=TCP localport=${PORT}\n`
+    );
+  }
+
+  console.log('  Phone and computer must be on the same Wi-Fi network.\n');
+}
