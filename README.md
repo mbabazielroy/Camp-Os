@@ -26,6 +26,9 @@ edit, and approve it. Even with Gmail connected, approved replies land in your G
   and urgency, summarizes it, drafts a reply from the knowledge base, and suggests a
   follow-up task you can accept with one tap. Edit, regenerate with instructions, then
   approve or dismiss.
+- **Google Calendar** (optional): connect the camp's calendar in Settings. Confirmed
+  retreat bookings are written to it as all-day events (enquiries are not, and cancelling
+  removes the event), and the dashboard shows what's coming up.
 - **Gmail integration** (optional): connect the camp inbox in Settings. "Sync inbox"
   imports recent primary-inbox emails and triages them; approving a reply files it into
   the Gmail drafts folder in the right thread.
@@ -116,7 +119,8 @@ real App Store / Play Store app with `eas build`.
 - `app/login` - sign in / sign up (signup auto-creates a camp or accepts an invite)
 - `app/(app)` - authenticated app shell and feature pages: `dashboard`, `tasks`,
   `email-assistant`, `knowledge-base`, `people`, `settings`
-- `app/api/gmail` - OAuth connect/callback routes
+- `app/api/gmail`, `app/api/calendar` - Google OAuth connect/callback routes
+- `lib/google.ts` - shared OAuth; `lib/calendar.ts` - Calendar REST client
 - `lib/auth.ts` - `requireCamp()`: resolves the signed-in user's camp for every action
 - `lib/ai/email.ts` - OpenAI triage + draft + suggested-task call (structured output)
 - `lib/gmail.ts` / `lib/gmail-account.ts` - Gmail REST client and token refresh

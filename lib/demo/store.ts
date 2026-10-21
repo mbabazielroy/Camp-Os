@@ -22,13 +22,18 @@ function rowsOf(table: string): DemoRow[] {
   return all[table];
 }
 
-type Comparison = { column: string; op: string; value: unknown };
+type Comparison = { column: string; op: string; value: unknown; negate?: boolean };
 
 function valueOf(row: DemoRow, column: string): unknown {
   return row[column];
 }
 
-function matchesOne(row: DemoRow, { column, op, value }: Comparison): boolean {
+function matchesOne(row: DemoRow, comparison: Comparison): boolean {
+  const result = matchesComparison(row, comparison);
+  return comparison.negate ? !result : result;
+}
+
+function matchesComparison(row: DemoRow, { column, op, value }: Comparison): boolean {
   const actual = valueOf(row, column);
 
   switch (op) {
@@ -170,7 +175,23 @@ const COLUMN_DEFAULTS: Record<string, DemoRow> = {
     suggested_task_accepted: false,
     status: "pending",
   },
+  bookings: {
+    contact_name: null,
+    contact_email: null,
+    contact_phone: null,
+    start_date: null,
+    end_date: null,
+    headcount: null,
+    status: "inquiry",
+    notes: null,
+    google_event_id: null,
+  },
   gmail_accounts: { last_synced_at: null, connected_by: null },
+  calendar_accounts: {
+    calendar_id: "primary",
+    last_synced_at: null,
+    connected_by: null,
+  },
 };
 
 export class DemoQuery implements PromiseLike<DemoResult> {
@@ -230,6 +251,10 @@ export class DemoQuery implements PromiseLike<DemoResult> {
   }
   ilike(column: string, value: string) {
     this.comparisons.push({ column, op: "ilike", value });
+    return this;
+  }
+  not(column: string, op: string, value: unknown) {
+    this.comparisons.push({ column, op, value, negate: true });
     return this;
   }
   or(filter: string) {

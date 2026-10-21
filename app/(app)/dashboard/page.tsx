@@ -2,7 +2,15 @@ import Link from "next/link";
 import { requireCamp } from "@/lib/auth";
 import { createTask } from "@/app/(app)/tasks/actions";
 import { addStarterPack } from "@/app/(app)/knowledge-base/actions";
-import { todayISODate, tomorrowISODate, formatRelativeTime } from "@/lib/dates";
+import {
+  todayISODate,
+  tomorrowISODate,
+  formatRelativeTime,
+  formatDateRange,
+} from "@/lib/dates";
+import { getSeason } from "@/lib/season";
+import { getAgenda, formatEventWhen } from "@/lib/agenda";
+import { BOOKING_STATUS_LABELS, BOOKING_STATUS_STYLES } from "@/lib/labels";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -20,6 +28,8 @@ import {
   Sparkles,
   CheckCircle2,
   Circle,
+  Tent,
+  CalendarDays,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -47,6 +57,7 @@ export default async function DashboardPage() {
     { count: kbCount },
     { count: emailEverCount },
     { data: gmailAccount },
+    { data: upcomingGroups },
   ] = await Promise.all([
     supabase.from("camps").select("name").eq("id", campId).maybeSingle(),
     supabase
@@ -96,10 +107,21 @@ export default async function DashboardPage() {
       .select("id", { count: "exact", head: true })
       .eq("camp_id", campId),
     supabase.from("gmail_accounts").select("email").eq("camp_id", campId).maybeSingle(),
+    supabase
+      .from("bookings")
+      .select("*")
+      .eq("camp_id", campId)
+      .in("status", ["inquiry", "confirmed"])
+      .gte("end_date", today)
+      .order("start_date", { ascending: true, nullsFirst: false })
+      .limit(4),
   ]);
+
+  const agenda = await getAgenda(supabase, campId);
 
   const firstName = fullName?.split(" ")?.[0];
   const now = new Date();
+  const season = getSeason(now);
   const caughtUp =
     (priorityTasks?.length ?? 0) === 0 && (pendingEmails?.length ?? 0) === 0;
 
@@ -159,21 +181,28 @@ export default async function DashboardPage() {
           />
         </svg>
         <div className="relative">
-          <p className="flex items-center gap-1.5 text-sm text-white/80">
-            <Sun size={15} />
-            {now.toLocaleDateString("en-US", {
-              weekday: "long",
-              month: "long",
-              day: "numeric",
-            })}
-          </p>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <p className="flex items-center gap-1.5 text-sm text-white/80">
+              <Sun size={15} />
+              {now.toLocaleDateString("en-US", {
+                weekday: "long",
+                month: "long",
+                day: "numeric",
+              })}
+            </p>
+            <span className="rounded-full bg-white/15 px-2 py-0.5 text-[11px] font-medium text-white/90">
+              {season.label}
+            </span>
+          </div>
           <h1 className="text-2xl font-semibold mt-1">
             {greetingForHour(now.getHours())}
             {firstName ? `, ${firstName}` : ""}
           </h1>
           <p className="text-sm text-white/80 mt-1">
             {caughtUp
-              ? "All clear - go be with the campers."
+              ? season.isCampSeason
+                ? "All clear - go be with the campers."
+                : "All clear - nothing needs you right now."
               : briefingParts.length > 0
                 ? `Today: ${briefingParts.join(" and ")}.`
                 : "Here's what needs you before you head out."}
@@ -340,6 +369,82 @@ export default async function DashboardPage() {
           </SubmitButton>
         </form>
       </Card>
+
+      {agenda.connected && agenda.events.length > 0 && (
+        <section className="mb-8">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="font-semibold text-foreground flex items-center gap-2">
+              <CalendarDays size={17} className="text-primary" />
+              On the calendar
+            </h2>
+            <Link
+              href="/settings"
+              className="text-sm font-medium text-primary hover:underline"
+            >
+              Calendar settings
+            </Link>
+          </div>
+          <Card className="px-3">
+            <div className="divide-y divide-border">
+              {agenda.events.map((event) => (
+                <div key={event.id} className="flex items-center gap-3 py-3 px-1">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-foreground truncate">{event.summary}</p>
+                    <p className="text-sm text-muted truncate">
+                      {[formatEventWhen(event), event.location].filter(Boolean).join(" · ")}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </section>
+      )}
+
+      {upcomingGroups && upcomingGroups.length > 0 && (
+        <section className="mb-8">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="font-semibold text-foreground flex items-center gap-2">
+              <Tent size={17} className="text-primary" />
+              Groups coming up
+            </h2>
+            <Link
+              href="/people/groups"
+              className="text-sm font-medium text-primary hover:underline"
+            >
+              View all
+            </Link>
+          </div>
+          <Card className="px-3">
+            <div className="divide-y divide-border">
+              {upcomingGroups.map((booking) => (
+                <Link
+                  key={booking.id}
+                  href={`/people/groups/${booking.id}`}
+                  className="flex items-center justify-between gap-3 py-3 px-1 group"
+                >
+                  <div className="min-w-0">
+                    <p className="font-medium text-foreground truncate group-hover:text-primary transition-colors">
+                      {booking.group_name}
+                    </p>
+                    <p className="text-sm text-muted truncate">
+                      {[
+                        formatDateRange(booking.start_date, booking.end_date),
+                        booking.headcount ? `${booking.headcount} people` : null,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ") || "No dates yet"}
+                    </p>
+                  </div>
+                  <Badge className={`${BOOKING_STATUS_STYLES[booking.status]} shrink-0`}>
+                    {BOOKING_STATUS_LABELS[booking.status]}
+                  </Badge>
+                </Link>
+              ))}
+            </div>
+          </Card>
+        </section>
+      )}
 
       <section className="mb-8">
         <div className="flex items-center justify-between mb-2">

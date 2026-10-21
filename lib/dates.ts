@@ -48,3 +48,18 @@ export function formatRelativeTime(isoTimestamp: string): string {
   if (diffDays < 7) return `${diffDays}d ago`;
   return new Date(isoTimestamp).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
+
+export function formatDateRange(start: string | null, end: string | null): string | null {
+  if (!start && !end) return null;
+
+  const fmt = (iso: string) =>
+    new Date(iso + "T00:00:00").toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
+
+  if (start && end) {
+    return start === end ? fmt(start) : `${fmt(start)} - ${fmt(end)}`;
+  }
+  return fmt((start ?? end) as string);
+}

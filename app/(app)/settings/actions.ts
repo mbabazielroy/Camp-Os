@@ -79,3 +79,19 @@ export async function disconnectGmail() {
   revalidatePath("/email-assistant");
   redirect("/settings?notice=" + encodeURIComponent("Gmail disconnected."));
 }
+
+export async function disconnectCalendar() {
+  const { supabase, campId } = await requireCamp();
+
+  await supabase.from("calendar_accounts").delete().eq("camp_id", campId);
+  // Forget the event ids so a future reconnect doesn't try to update events
+  // that belong to a calendar we can no longer reach.
+  await supabase
+    .from("bookings")
+    .update({ google_event_id: null })
+    .eq("camp_id", campId)
+    .not("google_event_id", "is", null);
+
+  revalidatePath("/settings");
+  redirect("/settings?notice=" + encodeURIComponent("Google Calendar disconnected."));
+}

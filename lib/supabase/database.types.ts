@@ -11,6 +11,7 @@ export type KnowledgeCategory =
   | "pickup_times"
   | "packing_list"
   | "policy"
+  | "retreat"
   | "other";
 
 export type EmailCategory =
@@ -20,7 +21,12 @@ export type EmailCategory =
   | "billing"
   | "logistics"
   | "general"
+  | "retreat"
+  | "registration"
+  | "donation"
   | "other";
+
+export type BookingStatus = "inquiry" | "confirmed" | "completed" | "cancelled";
 
 export type EmailUrgency = "low" | "medium" | "high" | "urgent";
 export type EmailDraftStatus = "pending" | "approved" | "dismissed";
@@ -182,6 +188,30 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["staff"]["Row"]>;
         Relationships: [];
       };
+      bookings: {
+        Row: {
+          id: string;
+          camp_id: string;
+          group_name: string;
+          contact_name: string | null;
+          contact_email: string | null;
+          contact_phone: string | null;
+          start_date: string | null;
+          end_date: string | null;
+          headcount: number | null;
+          status: BookingStatus;
+          notes: string | null;
+          google_event_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["bookings"]["Row"]> & {
+          camp_id: string;
+          group_name: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["bookings"]["Row"]>;
+        Relationships: [];
+      };
       email_drafts: {
         Row: {
           id: string;
@@ -210,6 +240,29 @@ export interface Database {
           original_email: string;
         };
         Update: Partial<Database["public"]["Tables"]["email_drafts"]["Row"]>;
+        Relationships: [];
+      };
+      calendar_accounts: {
+        Row: {
+          camp_id: string;
+          email: string;
+          calendar_id: string;
+          access_token: string;
+          refresh_token: string;
+          expires_at: string;
+          connected_by: string | null;
+          last_synced_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["calendar_accounts"]["Row"]> & {
+          camp_id: string;
+          email: string;
+          access_token: string;
+          refresh_token: string;
+          expires_at: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["calendar_accounts"]["Row"]>;
         Relationships: [];
       };
       gmail_accounts: {

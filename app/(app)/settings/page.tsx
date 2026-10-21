@@ -1,6 +1,13 @@
 import { requireCamp } from "@/lib/auth";
 import { isGmailConfigured } from "@/lib/gmail";
-import { updateCampName, inviteMember, revokeInvite, disconnectGmail } from "./actions";
+import { isCalendarConfigured } from "@/lib/calendar";
+import {
+  updateCampName,
+  inviteMember,
+  revokeInvite,
+  disconnectGmail,
+  disconnectCalendar,
+} from "./actions";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -9,7 +16,7 @@ import { LinkButton } from "@/components/ui/Button";
 import { SubmitButton } from "@/components/ui/SubmitButton";
 import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { formatRelativeTime } from "@/lib/dates";
-import { Mail, UserPlus } from "lucide-react";
+import { Mail, UserPlus, CalendarDays } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -21,8 +28,13 @@ export default async function SettingsPage({
   const { notice, error } = await searchParams;
   const { supabase, campId, role, userId } = await requireCamp();
 
-  const [{ data: camp }, { data: members }, { data: invites }, { data: gmailAccount }] =
-    await Promise.all([
+  const [
+    { data: camp },
+    { data: members },
+    { data: invites },
+    { data: gmailAccount },
+    { data: calendarAccount },
+  ] = await Promise.all([
       supabase.from("camps").select("name").eq("id", campId).maybeSingle(),
       supabase
         .from("profiles")
@@ -40,10 +52,16 @@ export default async function SettingsPage({
         .select("email, last_synced_at, created_at")
         .eq("camp_id", campId)
         .maybeSingle(),
+      supabase
+        .from("calendar_accounts")
+        .select("email, calendar_id, last_synced_at")
+        .eq("camp_id", campId)
+        .maybeSingle(),
     ]);
 
   const isDirector = role === "director";
   const gmailConfigured = isGmailConfigured();
+  const calendarConfigured = isCalendarConfigured();
 
   return (
     <div>
@@ -121,6 +139,58 @@ export default async function SettingsPage({
                   <p className="text-xs rounded-lg bg-warning-soft text-warning px-3 py-2 inline-block">
                     Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in the environment to enable
                     this.
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+        </Card>
+      </section>
+
+      <section className="mb-6">
+        <h2 className="font-semibold text-foreground mb-2">Google Calendar</h2>
+        <Card className="p-4">
+          {calendarAccount ? (
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-foreground flex items-center gap-1.5">
+                  <CalendarDays size={15} className="text-primary" /> {calendarAccount.email}
+                </p>
+                <p className="text-xs text-muted mt-0.5">
+                  {calendarAccount.last_synced_at
+                    ? `Last updated ${formatRelativeTime(calendarAccount.last_synced_at)}`
+                    : "Connected - no bookings written yet"}
+                </p>
+              </div>
+              <form action={disconnectCalendar}>
+                <ConfirmButton
+                  confirmMessage="Disconnect Google Calendar? Events already on the calendar stay there, but new bookings won't be added."
+                  variant="secondary"
+                >
+                  Disconnect
+                </ConfirmButton>
+              </form>
+            </div>
+          ) : (
+            <div>
+              <p className="text-sm text-foreground">
+                Put the camp&apos;s retreat groups on your Google Calendar automatically, so
+                staff can see who is on site without opening this app.
+              </p>
+              <p className="text-xs text-muted mt-1">
+                Confirmed bookings with dates are added as all-day events; enquiries are
+                not, and cancelling a booking removes its event. CampFlow asks only for
+                calendar access - it can&apos;t read your mail from here.
+              </p>
+              <div className="mt-3">
+                {calendarConfigured ? (
+                  <LinkButton href="/api/calendar/connect" size="sm">
+                    <CalendarDays size={15} /> Connect Google Calendar
+                  </LinkButton>
+                ) : (
+                  <p className="text-xs rounded-lg bg-warning-soft text-warning px-3 py-2 inline-block">
+                    Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in the environment to
+                    enable this.
                   </p>
                 )}
               </div>

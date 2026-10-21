@@ -178,7 +178,9 @@ create table if not exists public.knowledge_base (
   id uuid primary key default gen_random_uuid(),
   camp_id uuid not null references public.camps (id) on delete cascade,
   category text not null default 'other' check (
-    category in ('rules', 'pickup_times', 'packing_list', 'policy', 'other')
+    category in (
+      'rules', 'pickup_times', 'packing_list', 'policy', 'retreat', 'other'
+    )
   ),
   title text not null,
   content text not null,
@@ -288,6 +290,43 @@ create trigger staff_set_updated_at
   for each row execute procedure public.set_updated_at();
 
 -- ---------------------------------------------------------------------------
+-- bookings: retreat / group bookings. Mill Stream runs as a retreat centre
+-- outside the summer sessions, so this is the bulk of off-season admin.
+-- ---------------------------------------------------------------------------
+create table if not exists public.bookings (
+  id uuid primary key default gen_random_uuid(),
+  camp_id uuid not null references public.camps (id) on delete cascade,
+  group_name text not null,
+  contact_name text,
+  contact_email text,
+  contact_phone text,
+  start_date date,
+  end_date date,
+  headcount int,
+  status text not null default 'inquiry' check (
+    status in ('inquiry', 'confirmed', 'completed', 'cancelled')
+  ),
+  notes text,
+  google_event_id text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.bookings enable row level security;
+
+create policy "Members manage their camp bookings" on public.bookings
+  for all using (camp_id = public.user_camp_id())
+  with check (camp_id = public.user_camp_id());
+
+create index if not exists bookings_camp_id_idx on public.bookings (camp_id);
+create index if not exists bookings_start_date_idx on public.bookings (start_date);
+
+drop trigger if exists bookings_set_updated_at on public.bookings;
+create trigger bookings_set_updated_at
+  before update on public.bookings
+  for each row execute procedure public.set_updated_at();
+
+-- ---------------------------------------------------------------------------
 -- email_drafts: pasted or Gmail-synced emails, AI triage, and drafted replies.
 -- The AI never sends anything - status only ever moves from pending to
 -- approved/dismissed by a human in the UI. Approving a Gmail-sourced email
@@ -304,7 +343,10 @@ create table if not exists public.email_drafts (
   gmail_message_id text,
   gmail_thread_id text,
   category text check (
-    category in ('pickup', 'medical', 'behavior', 'billing', 'logistics', 'general', 'other')
+    category in (
+      'pickup', 'medical', 'behavior', 'billing', 'logistics', 'general',
+      'retreat', 'registration', 'donation', 'other'
+    )
   ),
   urgency text check (urgency in ('low', 'medium', 'high', 'urgent')),
   ai_summary text,
@@ -331,6 +373,35 @@ create index if not exists email_drafts_status_idx on public.email_drafts (statu
 drop trigger if exists email_drafts_set_updated_at on public.email_drafts;
 create trigger email_drafts_set_updated_at
   before update on public.email_drafts
+  for each row execute procedure public.set_updated_at();
+
+-- ---------------------------------------------------------------------------
+-- calendar_accounts: one connected Google Calendar per camp. Confirmed
+-- bookings are written to it so everyone on staff sees who is on site.
+-- Tokens carry only the calendar.events scope - no mail access.
+-- ---------------------------------------------------------------------------
+create table if not exists public.calendar_accounts (
+  camp_id uuid primary key references public.camps (id) on delete cascade,
+  email text not null,
+  calendar_id text not null default 'primary',
+  access_token text not null,
+  refresh_token text not null,
+  expires_at timestamptz not null,
+  connected_by uuid references auth.users (id) on delete set null,
+  last_synced_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.calendar_accounts enable row level security;
+
+create policy "Members manage their camp calendar account" on public.calendar_accounts
+  for all using (camp_id = public.user_camp_id())
+  with check (camp_id = public.user_camp_id());
+
+drop trigger if exists calendar_accounts_set_updated_at on public.calendar_accounts;
+create trigger calendar_accounts_set_updated_at
+  before update on public.calendar_accounts
   for each row execute procedure public.set_updated_at();
 
 -- ---------------------------------------------------------------------------
