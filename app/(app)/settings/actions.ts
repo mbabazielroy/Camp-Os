@@ -3,12 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireCamp } from "@/lib/auth";
+import { field } from "@/lib/form";
 
 export async function updateCampName(formData: FormData) {
   const { supabase, campId, role } = await requireCamp();
   if (role !== "director") return;
 
-  const name = String(formData.get("name") ?? "").trim();
+  const name = field(formData, "name").trim();
   if (!name) return;
 
   await supabase.from("camps").update({ name }).eq("id", campId);
@@ -23,7 +24,7 @@ export async function inviteMember(formData: FormData) {
     redirect("/settings?error=" + encodeURIComponent("Only directors can invite teammates."));
   }
 
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const email = field(formData, "email").trim().toLowerCase();
   if (!email || !email.includes("@")) {
     redirect("/settings?error=" + encodeURIComponent("Enter a valid email address."));
   }

@@ -1,7 +1,23 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { isSupabaseConfigured } from "@/lib/env";
+import { DEMO_COOKIE } from "@/lib/demo/client";
+import { field } from "@/lib/form";
+
+// Without a database the app runs on sample data; this cookie stands in for
+// a session so the login screen is still part of the walkthrough.
+async function startDemoSession() {
+  const cookieStore = await cookies();
+  cookieStore.set(DEMO_COOKIE, "1", {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7,
+  });
+}
 
 function fail(mode: string, redirectTo: string, message: string): never {
   const params = new URLSearchParams({ mode, error: message });
@@ -10,9 +26,14 @@ function fail(mode: string, redirectTo: string, message: string): never {
 }
 
 export async function signIn(formData: FormData) {
-  const email = String(formData.get("email") ?? "").trim();
-  const password = String(formData.get("password") ?? "");
-  const redirectTo = String(formData.get("redirectTo") ?? "/dashboard");
+  if (!isSupabaseConfigured()) {
+    await startDemoSession();
+    redirect("/dashboard");
+  }
+
+  const email = field(formData, "email").trim();
+  const password = field(formData, "password");
+  const redirectTo = (field(formData, "redirectTo") || "/dashboard");
 
   if (!email || !password) {
     fail("signin", redirectTo, "Enter your email and password.");
@@ -29,10 +50,15 @@ export async function signIn(formData: FormData) {
 }
 
 export async function signUp(formData: FormData) {
-  const email = String(formData.get("email") ?? "").trim();
-  const password = String(formData.get("password") ?? "");
-  const fullName = String(formData.get("fullName") ?? "").trim();
-  const campName = String(formData.get("campName") ?? "").trim();
+  if (!isSupabaseConfigured()) {
+    await startDemoSession();
+    redirect("/dashboard");
+  }
+
+  const email = field(formData, "email").trim();
+  const password = field(formData, "password");
+  const fullName = field(formData, "fullName").trim();
+  const campName = field(formData, "campName").trim();
 
   if (!email || !password) {
     fail("signup", "", "Enter your email and password.");
@@ -67,6 +93,12 @@ export async function signUp(formData: FormData) {
 }
 
 export async function signOut() {
+  if (!isSupabaseConfigured()) {
+    const cookieStore = await cookies();
+    cookieStore.delete(DEMO_COOKIE);
+    redirect("/login");
+  }
+
   const supabase = await createClient();
   await supabase.auth.signOut();
   redirect("/login");

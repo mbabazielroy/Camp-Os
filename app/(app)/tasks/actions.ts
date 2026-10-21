@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireCamp } from "@/lib/auth";
 import type { TaskPriority } from "@/lib/supabase/database.types";
+import { field } from "@/lib/form";
 
 function revalidateTaskViews() {
   revalidatePath("/tasks");
@@ -13,12 +14,12 @@ function revalidateTaskViews() {
 export async function createTask(formData: FormData) {
   const { supabase, campId, userId } = await requireCamp();
 
-  const title = String(formData.get("title") ?? "").trim();
+  const title = field(formData, "title").trim();
   if (!title) return;
 
-  const description = String(formData.get("description") ?? "").trim() || null;
-  const dueDate = String(formData.get("due_date") ?? "").trim() || null;
-  const priority = (String(formData.get("priority") ?? "medium") as TaskPriority) || "medium";
+  const description = field(formData, "description").trim() || null;
+  const dueDate = field(formData, "due_date").trim() || null;
+  const priority = ((field(formData, "priority") || "medium") as TaskPriority) || "medium";
 
   await supabase.from("tasks").insert({
     camp_id: campId,
@@ -35,11 +36,11 @@ export async function createTask(formData: FormData) {
 export async function updateTask(id: string, formData: FormData) {
   const { supabase, campId } = await requireCamp();
 
-  const title = String(formData.get("title") ?? "").trim();
+  const title = field(formData, "title").trim();
   if (!title) return;
-  const description = String(formData.get("description") ?? "").trim() || null;
-  const dueDate = String(formData.get("due_date") ?? "").trim() || null;
-  const priority = (String(formData.get("priority") ?? "medium") as TaskPriority) || "medium";
+  const description = field(formData, "description").trim() || null;
+  const dueDate = field(formData, "due_date").trim() || null;
+  const priority = ((field(formData, "priority") || "medium") as TaskPriority) || "medium";
 
   await supabase
     .from("tasks")
