@@ -6,6 +6,9 @@ import type { EmailCategory, EmailUrgency } from "@/lib/supabase/database.types"
 import type { EmailAnalysis, KnowledgeSnippet } from "./email";
 
 const CATEGORY_HINTS: { category: EmailCategory; words: string[] }[] = [
+  { category: "retreat", words: ["retreat", "rental", "rent the", "book the", "booking", "our group", "church group", "youth group", "weekend for", "facility", "lodge", "conference"] },
+  { category: "registration", words: ["register", "registration", "sign up", "signup", "enrol", "enroll", "next summer", "spots", "waitlist", "session dates"] },
+  { category: "donation", words: ["donate", "donation", "donor", "give to", "fundraiser", "sponsorship", "tax receipt", "bursary"] },
   { category: "pickup", words: ["pickup", "pick up", "pick-up", "drop off", "dropoff", "collect", "early"] },
   { category: "medical", words: ["medication", "medicine", "allergy", "allergies", "epipen", "inhaler", "nurse", "sick", "ill", "injury", "fever"] },
   { category: "behavior", words: ["behaviour", "behavior", "homesick", "bully", "fight", "upset", "crying", "discipline"] },
@@ -29,7 +32,9 @@ function gradeUrgency(text: string, category: EmailCategory): EmailUrgency {
   if (URGENT_WORDS.some((w) => lower.includes(w))) return "urgent";
   if (category === "medical") return "high";
   if (SOON_WORDS.some((w) => lower.includes(w))) return "high";
-  if (category === "pickup" || category === "billing") return "medium";
+  if (category === "pickup" || category === "billing" || category === "retreat") {
+    return "medium";
+  }
   return "low";
 }
 
@@ -80,6 +85,15 @@ function suggestTask(text: string, category: EmailCategory, senderName?: string 
   }
   if (category === "billing") {
     return { title: `Check the office records before replying to ${who}`, due_date: null };
+  }
+  if (category === "retreat") {
+    return { title: `Check the booking calendar for ${who}'s group`, due_date: null };
+  }
+  if (category === "registration") {
+    return { title: `Send ${who} the registration dates once they are confirmed`, due_date: null };
+  }
+  if (category === "donation") {
+    return { title: `Thank ${who} and arrange the receipt`, due_date: null };
   }
   if (lower.includes("confirm") || lower.includes("let me know") || lower.includes("get back")) {
     return { title: `Follow up with ${who}`, due_date: null };

@@ -4,11 +4,14 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireCamp } from "@/lib/auth";
 import { field } from "@/lib/form";
+import type { BookingStatus } from "@/lib/supabase/database.types";
 
 function revalidatePeople() {
   revalidatePath("/people/campers");
   revalidatePath("/people/guardians");
   revalidatePath("/people/staff");
+  revalidatePath("/people/groups");
+  revalidatePath("/dashboard");
 }
 
 // --- Guardians -------------------------------------------------------------
@@ -176,4 +179,60 @@ export async function deleteStaff(id: string) {
   await supabase.from("staff").delete().eq("id", id).eq("camp_id", campId);
   revalidatePeople();
   redirect("/people/staff");
+}
+
+// --- Retreat / group bookings ------------------------------------------------
+
+function bookingFields(formData: FormData) {
+  const headcountRaw = field(formData, "headcount").trim();
+  const headcount = headcountRaw ? Number(headcountRaw) : null;
+
+  return {
+    contact_name: field(formData, "contact_name").trim() || null,
+    contact_email: field(formData, "contact_email").trim() || null,
+    contact_phone: field(formData, "contact_phone").trim() || null,
+    start_date: field(formData, "start_date").trim() || null,
+    end_date: field(formData, "end_date").trim() || null,
+    headcount: headcount !== null && Number.isFinite(headcount) ? headcount : null,
+    status: (field(formData, "status") || "inquiry") as BookingStatus,
+    notes: field(formData, "notes").trim() || null,
+  };
+}
+
+export async function createBooking(formData: FormData) {
+  const { supabase, campId } = await requireCamp();
+
+  const groupName = field(formData, "group_name").trim();
+  if (!groupName) return;
+
+  await supabase.from("bookings").insert({
+    camp_id: campId,
+    group_name: groupName,
+    ...bookingFields(formData),
+  });
+
+  revalidatePeople();
+}
+
+export async function updateBooking(id: string, formData: FormData) {
+  const { supabase, campId } = await requireCamp();
+
+  const groupName = field(formData, "group_name").trim();
+  if (!groupName) return;
+
+  await supabase
+    .from("bookings")
+    .update({ group_name: groupName, ...bookingFields(formData) })
+    .eq("id", id)
+    .eq("camp_id", campId);
+
+  revalidatePeople();
+  redirect("/people/groups");
+}
+
+export async function deleteBooking(id: string) {
+  const { supabase, campId } = await requireCamp();
+  await supabase.from("bookings").delete().eq("id", id).eq("camp_id", campId);
+  revalidatePeople();
+  redirect("/people/groups");
 }

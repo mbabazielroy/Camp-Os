@@ -170,6 +170,16 @@ const COLUMN_DEFAULTS: Record<string, DemoRow> = {
     suggested_task_accepted: false,
     status: "pending",
   },
+  bookings: {
+    contact_name: null,
+    contact_email: null,
+    contact_phone: null,
+    start_date: null,
+    end_date: null,
+    headcount: null,
+    status: "inquiry",
+    notes: null,
+  },
   gmail_accounts: { last_synced_at: null, connected_by: null },
 };
 

@@ -59,6 +59,30 @@ export const KB_STARTERS: KnowledgeStarter[] = [
       "Cancellations more than [2 weeks] before the session start receive a full refund minus a [$50] deposit. Cancellations within [2 weeks] receive a [50%] refund. No refunds after the session begins, except for documented medical reasons, which are credited to a future session.",
   },
   {
+    category: "retreat",
+    title: "Retreat and group bookings",
+    content:
+      "We host groups of [20 to 110] year-round outside the summer sessions. A weekend booking runs [Friday evening to Sunday afternoon] and includes [accommodation, all meals, and use of the lodge and grounds]. To hold dates we need a signed agreement and a [25%] deposit. Email the office with your dates, approximate numbers, and any meal requirements.",
+  },
+  {
+    category: "retreat",
+    title: "Facility rates and what's included",
+    content:
+      "Weekend package: [$X per person] with meals, [$Y per person] without. Day use: [$Z per person]. Rates include [bedding / do not include bedding], use of the dining hall, chapel and grounds. Activities such as [the ropes course and waterfront] are seasonal and staffed at extra cost - ask when you book.",
+  },
+  {
+    category: "policy",
+    title: "Off-season office hours",
+    content:
+      "Between September and May the office is staffed [Tuesday to Friday, 9 AM to 3 PM]. Email is the most reliable way to reach us and we reply within [two business days]. During summer sessions the office is open daily.",
+  },
+  {
+    category: "policy",
+    title: "Summer registration dates",
+    content:
+      "Registration for next summer opens [the first Monday of February]. Returning families get [one week of] priority registration before it opens to everyone. Sessions fill in roughly [three weeks]; after that we keep a waitlist and contact families as spots open.",
+  },
+  {
     category: "rules",
     title: "Phones and electronics",
     content:
