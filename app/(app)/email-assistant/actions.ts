@@ -8,6 +8,7 @@ import { getGmailConnection } from "@/lib/gmail-account";
 import { listInboxMessages, getMessage, createReplyDraft } from "@/lib/gmail";
 import type { createClient } from "@/lib/supabase/server";
 import type { EmailCategory, EmailUrgency } from "@/lib/supabase/database.types";
+import { field } from "@/lib/form";
 
 type Supabase = Awaited<ReturnType<typeof createClient>>;
 
@@ -41,14 +42,14 @@ function analysisFields(analysis: EmailAnalysis) {
 export async function createEmailDraft(formData: FormData) {
   const { supabase, campId } = await requireCamp();
 
-  const originalEmail = String(formData.get("original_email") ?? "").trim();
+  const originalEmail = field(formData, "original_email").trim();
   if (!originalEmail) {
     redirect("/email-assistant/new?error=" + encodeURIComponent("Paste the email text first."));
   }
 
-  const senderName = String(formData.get("sender_name") ?? "").trim() || null;
-  const senderEmail = String(formData.get("sender_email") ?? "").trim() || null;
-  const subject = String(formData.get("subject") ?? "").trim() || null;
+  const senderName = field(formData, "sender_name").trim() || null;
+  const senderEmail = field(formData, "sender_email").trim() || null;
+  const subject = field(formData, "subject").trim() || null;
 
   const knowledgeBase = await fetchKnowledgeBase(supabase, campId);
 
@@ -95,10 +96,10 @@ export async function createEmailDraft(formData: FormData) {
 export async function saveEmailDraft(id: string, formData: FormData) {
   const { supabase, campId } = await requireCamp();
 
-  const editedDraft = String(formData.get("edited_draft") ?? "");
-  const category = String(formData.get("category") ?? "other") as EmailCategory;
-  const urgency = String(formData.get("urgency") ?? "medium") as EmailUrgency;
-  const intent = String(formData.get("intent") ?? "save");
+  const editedDraft = field(formData, "edited_draft");
+  const category = (field(formData, "category") || "other") as EmailCategory;
+  const urgency = (field(formData, "urgency") || "medium") as EmailUrgency;
+  const intent = (field(formData, "intent") || "save");
 
   const status = intent === "approve" ? "approved" : intent === "dismiss" ? "dismissed" : "pending";
 
@@ -161,7 +162,7 @@ export async function regenerateDraft(id: string, formData: FormData) {
 
   if (!draft) redirect("/email-assistant");
 
-  const instructions = String(formData.get("instructions") ?? "").trim();
+  const instructions = field(formData, "instructions").trim();
   const knowledgeBase = await fetchKnowledgeBase(supabase, campId);
 
   let analysis: EmailAnalysis;

@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/Button";
 import { Input, Label } from "@/components/ui/Field";
 import { Card } from "@/components/ui/Card";
 import { BrandMark } from "@/components/Brand";
-import { Waves, Mail, ShieldCheck, Sparkles } from "lucide-react";
+import { isSupabaseConfigured } from "@/lib/env";
+import { Waves, Mail, ShieldCheck, Sparkles, FlaskConical } from "lucide-react";
 
 export default async function LoginPage({
   searchParams,
@@ -14,6 +15,7 @@ export default async function LoginPage({
   const params = await searchParams;
   const mode = params.mode === "signup" ? "signup" : "signin";
   const redirectTo = params.redirectTo ?? "/dashboard";
+  const demoMode = !isSupabaseConfigured();
 
   return (
     <div className="flex-1 flex min-h-screen">
@@ -82,6 +84,24 @@ export default async function LoginPage({
               Less time on email, more time with campers.
             </p>
           </div>
+
+          {demoMode && (
+            <div className="mb-5 rounded-2xl bg-accent-soft border border-accent/20 p-4">
+              <p className="text-sm font-medium text-foreground flex items-center gap-1.5">
+                <FlaskConical size={15} className="text-accent" />
+                Demo mode
+              </p>
+              <p className="text-sm text-muted mt-1">
+                No database is connected yet, so the app is running on sample Mill Stream
+                data. Sign in with anything - or just press the button - to look around.
+              </p>
+              <form action={signIn} className="mt-3">
+                <Button type="submit" className="w-full">
+                  Explore the demo
+                </Button>
+              </form>
+            </div>
+          )}
 
           <Card className="p-6">
             {params.notice && (

@@ -5,15 +5,16 @@ import { redirect } from "next/navigation";
 import { requireCamp } from "@/lib/auth";
 import { KB_STARTERS } from "@/lib/kb-starters";
 import type { KnowledgeCategory } from "@/lib/supabase/database.types";
+import { field } from "@/lib/form";
 
 export async function createKnowledgeEntry(formData: FormData) {
   const { supabase, campId } = await requireCamp();
 
-  const title = String(formData.get("title") ?? "").trim();
-  const content = String(formData.get("content") ?? "").trim();
+  const title = field(formData, "title").trim();
+  const content = field(formData, "content").trim();
   if (!title || !content) return;
 
-  const category = (String(formData.get("category") ?? "other") as KnowledgeCategory) || "other";
+  const category = ((field(formData, "category") || "other") as KnowledgeCategory) || "other";
 
   await supabase.from("knowledge_base").insert({
     camp_id: campId,
@@ -28,10 +29,10 @@ export async function createKnowledgeEntry(formData: FormData) {
 export async function updateKnowledgeEntry(id: string, formData: FormData) {
   const { supabase, campId } = await requireCamp();
 
-  const title = String(formData.get("title") ?? "").trim();
-  const content = String(formData.get("content") ?? "").trim();
+  const title = field(formData, "title").trim();
+  const content = field(formData, "content").trim();
   if (!title || !content) return;
-  const category = (String(formData.get("category") ?? "other") as KnowledgeCategory) || "other";
+  const category = ((field(formData, "category") || "other") as KnowledgeCategory) || "other";
 
   await supabase
     .from("knowledge_base")

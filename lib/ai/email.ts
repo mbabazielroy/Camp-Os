@@ -1,4 +1,6 @@
 import { getOpenAIClient } from "@/lib/openai";
+import { isOpenAIConfigured } from "@/lib/env";
+import { analyzeOffline } from "./offline";
 import type { EmailCategory, EmailUrgency } from "@/lib/supabase/database.types";
 
 export interface KnowledgeSnippet {
@@ -63,6 +65,12 @@ export async function analyzeAndDraftEmail(input: {
   knowledgeBase: KnowledgeSnippet[];
   instructions?: string;
 }): Promise<EmailAnalysis> {
+  // No key configured: fall back to deterministic rules so the assistant can
+  // still be walked through end to end.
+  if (!isOpenAIConfigured()) {
+    return analyzeOffline(input);
+  }
+
   const client = getOpenAIClient();
   const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
 
