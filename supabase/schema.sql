@@ -307,6 +307,7 @@ create table if not exists public.bookings (
     status in ('inquiry', 'confirmed', 'completed', 'cancelled')
   ),
   notes text,
+  google_event_id text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -372,6 +373,35 @@ create index if not exists email_drafts_status_idx on public.email_drafts (statu
 drop trigger if exists email_drafts_set_updated_at on public.email_drafts;
 create trigger email_drafts_set_updated_at
   before update on public.email_drafts
+  for each row execute procedure public.set_updated_at();
+
+-- ---------------------------------------------------------------------------
+-- calendar_accounts: one connected Google Calendar per camp. Confirmed
+-- bookings are written to it so everyone on staff sees who is on site.
+-- Tokens carry only the calendar.events scope - no mail access.
+-- ---------------------------------------------------------------------------
+create table if not exists public.calendar_accounts (
+  camp_id uuid primary key references public.camps (id) on delete cascade,
+  email text not null,
+  calendar_id text not null default 'primary',
+  access_token text not null,
+  refresh_token text not null,
+  expires_at timestamptz not null,
+  connected_by uuid references auth.users (id) on delete set null,
+  last_synced_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.calendar_accounts enable row level security;
+
+create policy "Members manage their camp calendar account" on public.calendar_accounts
+  for all using (camp_id = public.user_camp_id())
+  with check (camp_id = public.user_camp_id());
+
+drop trigger if exists calendar_accounts_set_updated_at on public.calendar_accounts;
+create trigger calendar_accounts_set_updated_at
+  before update on public.calendar_accounts
   for each row execute procedure public.set_updated_at();
 
 -- ---------------------------------------------------------------------------

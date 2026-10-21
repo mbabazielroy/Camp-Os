@@ -9,6 +9,7 @@ import {
   formatDateRange,
 } from "@/lib/dates";
 import { getSeason } from "@/lib/season";
+import { getAgenda, formatEventWhen } from "@/lib/agenda";
 import { BOOKING_STATUS_LABELS, BOOKING_STATUS_STYLES } from "@/lib/labels";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -28,6 +29,7 @@ import {
   CheckCircle2,
   Circle,
   Tent,
+  CalendarDays,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -114,6 +116,8 @@ export default async function DashboardPage() {
       .order("start_date", { ascending: true, nullsFirst: false })
       .limit(4),
   ]);
+
+  const agenda = await getAgenda(supabase, campId);
 
   const firstName = fullName?.split(" ")?.[0];
   const now = new Date();
@@ -365,6 +369,37 @@ export default async function DashboardPage() {
           </SubmitButton>
         </form>
       </Card>
+
+      {agenda.connected && agenda.events.length > 0 && (
+        <section className="mb-8">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="font-semibold text-foreground flex items-center gap-2">
+              <CalendarDays size={17} className="text-primary" />
+              On the calendar
+            </h2>
+            <Link
+              href="/settings"
+              className="text-sm font-medium text-primary hover:underline"
+            >
+              Calendar settings
+            </Link>
+          </div>
+          <Card className="px-3">
+            <div className="divide-y divide-border">
+              {agenda.events.map((event) => (
+                <div key={event.id} className="flex items-center gap-3 py-3 px-1">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-foreground truncate">{event.summary}</p>
+                    <p className="text-sm text-muted truncate">
+                      {[formatEventWhen(event), event.location].filter(Boolean).join(" · ")}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </section>
+      )}
 
       {upcomingGroups && upcomingGroups.length > 0 && (
         <section className="mb-8">

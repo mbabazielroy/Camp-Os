@@ -598,5 +598,7 @@ export function buildSeed(): Record<string, DemoRow[]> {
     ],
 
     gmail_accounts: [],
+
+    calendar_accounts: [],
   };
 }

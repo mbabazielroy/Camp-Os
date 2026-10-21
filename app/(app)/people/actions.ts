@@ -5,6 +5,10 @@ import { redirect } from "next/navigation";
 import { requireCamp } from "@/lib/auth";
 import { field } from "@/lib/form";
 import type { BookingStatus } from "@/lib/supabase/database.types";
+import {
+  removeBookingFromCalendar,
+  syncBookingToCalendar,
+} from "@/lib/bookings-calendar";
 
 function revalidatePeople() {
   revalidatePath("/people/campers");
@@ -205,11 +209,19 @@ export async function createBooking(formData: FormData) {
   const groupName = field(formData, "group_name").trim();
   if (!groupName) return;
 
-  await supabase.from("bookings").insert({
-    camp_id: campId,
-    group_name: groupName,
-    ...bookingFields(formData),
-  });
+  const { data: created } = await supabase
+    .from("bookings")
+    .insert({
+      camp_id: campId,
+      group_name: groupName,
+      ...bookingFields(formData),
+    })
+    .select("id")
+    .single();
+
+  if (created) {
+    await syncBookingToCalendar(supabase, campId, created.id);
+  }
 
   revalidatePeople();
 }
@@ -226,13 +238,25 @@ export async function updateBooking(id: string, formData: FormData) {
     .eq("id", id)
     .eq("camp_id", campId);
 
+  await syncBookingToCalendar(supabase, campId, id);
+
   revalidatePeople();
   redirect("/people/groups");
 }
 
 export async function deleteBooking(id: string) {
   const { supabase, campId } = await requireCamp();
+
+  const { data: booking } = await supabase
+    .from("bookings")
+    .select("google_event_id")
+    .eq("id", id)
+    .eq("camp_id", campId)
+    .maybeSingle();
+
   await supabase.from("bookings").delete().eq("id", id).eq("camp_id", campId);
+  await removeBookingFromCalendar(supabase, campId, booking?.google_event_id ?? null);
+
   revalidatePeople();
   redirect("/people/groups");
 }
