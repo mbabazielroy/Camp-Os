@@ -1,4 +1,5 @@
 import { CampPhoto } from "./CampPhoto";
+import { Treeline } from "./Treeline";
 import type { Photo } from "@/lib/site/photos";
 
 export function Section({
@@ -17,9 +18,12 @@ export function Section({
   );
 }
 
-export function Eyebrow({ children }: { children: React.ReactNode }) {
+// Handwritten section label, like a note pinned to the camp noticeboard.
+export function Eyebrow({ children, light = false }: { children: React.ReactNode; light?: boolean }) {
   return (
-    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-forest">{children}</p>
+    <p className={`font-script text-2xl font-semibold leading-none sm:text-[1.7rem] ${light ? "text-glow" : "text-forest"}`}>
+      {children}
+    </p>
   );
 }
 
@@ -37,7 +41,7 @@ export function SectionHeading({
   return (
     <div className={center ? "mx-auto max-w-2xl text-center" : "max-w-2xl"}>
       {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
-      <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight sm:text-4xl">{title}</h2>
+      <h2 className="mt-2 font-display text-3xl font-semibold tracking-tight text-balance sm:text-[2.6rem] sm:leading-[1.15]">{title}</h2>
       {intro && <p className="mt-4 text-base leading-relaxed text-muted sm:text-lg">{intro}</p>}
     </div>
   );
@@ -69,24 +73,15 @@ export function PageHero({
       ) : (
         <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full bg-white/10" aria-hidden />
       )}
-      <div className="relative mx-auto max-w-6xl px-4 pb-24 pt-16 sm:px-6 sm:pb-32 sm:pt-24">
-        {eyebrow && (
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70">{eyebrow}</p>
-        )}
-        <h1 className="mt-3 max-w-3xl font-display text-4xl font-semibold tracking-tight sm:text-5xl">
+      <div className="relative mx-auto max-w-6xl px-4 pb-28 pt-16 sm:px-6 sm:pb-36 sm:pt-28">
+        {eyebrow && <Eyebrow light>{eyebrow}</Eyebrow>}
+        <h1 className="mt-3 max-w-3xl font-display text-4xl font-semibold tracking-tight text-balance sm:text-6xl">
           {title}
         </h1>
         {intro && <p className="mt-5 max-w-2xl text-lg leading-relaxed text-white/85">{intro}</p>}
         {children}
       </div>
-      <svg
-        className="absolute -bottom-px left-0 block h-10 w-full text-background"
-        viewBox="0 0 1200 40"
-        preserveAspectRatio="none"
-        aria-hidden
-      >
-        <path d="M0 20 Q 150 0 300 20 T 600 20 T 900 20 T 1200 20 V40 H0Z" fill="currentColor" />
-      </svg>
+      <Treeline className="absolute -bottom-px left-0 h-10 text-background sm:h-14" />
     </div>
   );
 }

@@ -1,12 +1,19 @@
 import type { Metadata } from "next";
-import { Fraunces } from "next/font/google";
+import { Caveat, Fraunces } from "next/font/google";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
+import { CtaBand } from "@/components/site/CtaBand";
 import { camp } from "@/lib/site/content";
 
 const fraunces = Fraunces({
   variable: "--font-fraunces",
   subsets: ["latin"],
+});
+
+const caveat = Caveat({
+  variable: "--font-caveat",
+  subsets: ["latin"],
+  weight: ["500", "700"],
 });
 
 export const metadata: Metadata = {
@@ -20,7 +27,7 @@ export const metadata: Metadata = {
 
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className={`${fraunces.variable} flex min-h-screen flex-col`}>
+    <div className={`${fraunces.variable} ${caveat.variable} paper flex min-h-screen flex-col`}>
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-surface focus:px-4 focus:py-2"
@@ -31,6 +38,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
       <main id="main" className="flex-1">
         {children}
       </main>
+      <CtaBand />
       <SiteFooter />
     </div>
   );
