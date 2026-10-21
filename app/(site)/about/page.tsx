@@ -27,7 +27,7 @@ export default function AboutPage() {
               lifelong friends, and hear the good news of Jesus in a way they can understand.
             </p>
             <p>
-              The camp is owned and operated by {camp.owner}. Alongside our summer programs, we run a
+              The camp is owned and operated by {camp.owner} Alongside our summer programs, we run a
               year-round retreat centre and host Handi*Camp, an overnight camp for young people with special
               needs.
             </p>

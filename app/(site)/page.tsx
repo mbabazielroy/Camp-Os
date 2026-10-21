@@ -58,7 +58,7 @@ export default function HomePage() {
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-[#0f2f37]/55 via-[#0f2f37]/25 to-[#0f2f37]/70" />
         <div className="mx-auto flex min-h-[78vh] max-w-6xl flex-col justify-end px-4 pb-16 pt-24 text-white sm:px-6 sm:pb-24">
           <p className="inline-flex w-fit items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] backdrop-blur">
-            Since {camp.founded} &middot; Omemee, Ontario
+            {`Since ${camp.founded} · Omemee, Ontario`}
           </p>
           <h1 className="mt-5 max-w-3xl font-display text-5xl font-semibold leading-[1.05] tracking-tight sm:text-7xl">
             Where summer meets the stream.
