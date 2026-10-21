@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Sidebar } from "@/components/nav/Sidebar";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { TopBar } from "@/components/nav/TopBar";
+import { DemoBanner } from "@/components/DemoBanner";
 
 export default async function AppLayout({
   children,
@@ -38,6 +39,7 @@ export default async function AppLayout({
     <div className="flex min-h-screen">
       <Sidebar campName={campName} email={user.email ?? null} />
       <div className="flex-1 flex flex-col min-w-0">
+        <DemoBanner />
         <TopBar campName={campName} />
         <main className="flex-1 px-4 py-5 md:px-8 md:py-8 pb-28 md:pb-8 max-w-3xl w-full mx-auto md:mx-0">
           {children}

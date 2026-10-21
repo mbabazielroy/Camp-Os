@@ -57,10 +57,12 @@ export default function SetupPage() {
           <BrandMark size="lg" />
           <div>
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-              Finish setting up
+              {supabaseReady ? "Setup" : "Running on sample data"}
             </h1>
             <p className="text-sm text-muted mt-0.5">
-              The app needs a database and an AI key before it can run.
+              {supabaseReady
+                ? "Your camp's database is connected."
+                : "Explore the app now; connect these when you're ready to keep real records."}
             </p>
           </div>
         </div>
@@ -107,7 +109,9 @@ export default function SetupPage() {
         </Card>
 
         <Card className="p-5 mb-6">
-          <h2 className="font-semibold text-foreground mb-3">How to fix this</h2>
+          <h2 className="font-semibold text-foreground mb-3">
+            Connecting a real database
+          </h2>
           <ol className="space-y-4 text-sm text-muted">
             <li>
               <p className="text-foreground font-medium">1. Create a Supabase project</p>
@@ -175,14 +179,11 @@ OPENAI_API_KEY=sk-...`}
           </p>
         </Card>
 
-        {supabaseReady && (
-          <p className="mt-6 text-center text-sm text-muted">
-            Supabase looks configured.{" "}
-            <a href="/dashboard" className="text-primary font-medium hover:underline">
-              Go to the app
-            </a>
-          </p>
-        )}
+        <p className="mt-6 text-center text-sm text-muted">
+          <a href="/dashboard" className="text-primary font-medium hover:underline">
+            {supabaseReady ? "Go to the app" : "Back to the demo"}
+          </a>
+        </p>
       </div>
     </div>
   );

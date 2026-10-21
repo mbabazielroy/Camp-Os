@@ -34,6 +34,21 @@ edit, and approve it. Even with Gmail connected, approved replies land in your G
   edit the placeholders.
 - **Tasks & reminders**, **campers/guardians/staff records** with search.
 
+## Try it without any setup
+
+Clone, install, run - no database, no API keys:
+
+```bash
+npm install
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) and press **Explore the demo**. The app
+runs on sample Mill Stream data (campers, staff, tasks, knowledge base, emails awaiting
+review) held in memory, and a built-in stand-in writes the draft replies in place of
+OpenAI. Everything is editable; it resets when the server restarts. A banner says so on
+every screen, and `/setup` shows what to connect when you want to keep real records.
+
 ## Getting started
 
 1. Install dependencies:
