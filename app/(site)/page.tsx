@@ -13,10 +13,19 @@ import {
   Phone,
   Mail,
 } from "lucide-react";
-import { Scenery } from "@/components/site/Scenery";
+import { CampPhoto } from "@/components/site/CampPhoto";
 import { ProgramCard } from "@/components/site/ProgramCard";
 import { Section, SectionHeading, Eyebrow } from "@/components/site/Section";
 import { camp, programs, retreats, faqs, season, telHref } from "@/lib/site/content";
+import { photos } from "@/lib/site/photos";
+
+const gallery = [
+  { photo: photos.waterfront, caption: "Waterfront", className: "sm:col-span-2 sm:row-span-2" },
+  { photo: photos.campfire, caption: "Campfire nights", className: "" },
+  { photo: photos.games, caption: "Big field games", className: "" },
+  { photo: photos.woods, caption: "Exploring the woods", className: "" },
+  { photo: photos.cabin, caption: "Cabin life", className: "" },
+];
 
 const pillars = [
   {
@@ -54,14 +63,26 @@ export default function HomePage() {
     <>
       {/* Hero */}
       <div className="relative isolate overflow-hidden">
-        <Scenery className="absolute inset-0 -z-10 h-full w-full" />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-[#0f2f37]/55 via-[#0f2f37]/25 to-[#0f2f37]/70" />
+        <CampPhoto photo={photos.waterfront} priority className="absolute inset-0 -z-20" />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-[#0f2f37]/60 via-[#0f2f37]/30 to-[#0f2f37]/85" />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#0f2f37]/60 to-transparent" />
         <div className="mx-auto flex min-h-[78vh] max-w-6xl flex-col justify-end px-4 pb-16 pt-24 text-white sm:px-6 sm:pb-24">
           <p className="inline-flex w-fit items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] backdrop-blur">
             {`Since ${camp.founded} · Omemee, Ontario`}
           </p>
           <h1 className="mt-5 max-w-3xl font-display text-5xl font-semibold leading-[1.05] tracking-tight sm:text-7xl">
-            Where summer meets the stream.
+            Where summer meets the{" "}
+            <span className="relative inline-block">
+              stream.
+              <svg
+                className="absolute -bottom-2 left-0 h-3 w-full text-accent sm:-bottom-3 sm:h-4"
+                viewBox="0 0 200 12"
+                preserveAspectRatio="none"
+                aria-hidden
+              >
+                <path d="M2 8 Q 25 2 50 7 T 100 7 T 150 6 T 198 5" stroke="currentColor" strokeWidth="4" fill="none" strokeLinecap="round" />
+              </svg>
+            </span>
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/90">
             Bible-based summer camps for ages 5-15 and a year-round retreat centre, on {camp.acres}{" "}
@@ -159,14 +180,44 @@ export default function HomePage() {
         </div>
       </Section>
 
-      {/* A day at camp */}
+      {/* Gallery */}
       <Section>
+        <SectionHeading
+          eyebrow="Life at Mill Stream"
+          title="Days you'll hear about all year"
+          intro="Paddling the river, games in the big field, cabin chats and campfire songs - camp is where kids slow down, step outside and make friends who last."
+        />
+        <div className="mt-12 grid auto-rows-[180px] grid-cols-2 gap-3 sm:auto-rows-[220px] sm:grid-cols-4 sm:gap-4">
+          {gallery.map(({ photo, caption, className }) => (
+            <figure key={caption} className={`group relative overflow-hidden rounded-2xl ${className}`}>
+              <CampPhoto
+                photo={photo}
+                sizes="(min-width: 640px) 50vw, 100vw"
+                className="absolute inset-0 transition-transform duration-500 group-hover:scale-105"
+              />
+              <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#0f2f37]/85 to-transparent p-4 pt-10 text-sm font-semibold text-white">
+                {caption}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </Section>
+
+      {/* A day at camp */}
+      <Section className="pt-0 sm:pt-0">
         <div className="grid gap-12 lg:grid-cols-[1fr_1.2fr] lg:items-start">
-          <SectionHeading
-            eyebrow="A day at camp"
-            title="Sunrise to campfire"
-            intro="Every week has its own surprises, but a typical overnight day follows a rhythm campers quickly come to love."
-          />
+          <div>
+            <SectionHeading
+              eyebrow="A day at camp"
+              title="Sunrise to campfire"
+              intro="Every week has its own surprises, but a typical overnight day follows a rhythm campers quickly come to love."
+            />
+            <CampPhoto
+              photo={photos.campfire}
+              sizes="(min-width: 1024px) 40vw, 100vw"
+              className="mt-8 aspect-[4/3] rounded-2xl shadow-card"
+            />
+          </div>
           <ol className="relative space-y-6 border-l-2 border-dashed border-border pl-8">
             {day.map(({ icon: Icon, time, body }) => (
               <li key={time} className="relative">
@@ -183,8 +234,9 @@ export default function HomePage() {
 
       {/* Retreats */}
       <Section className="pt-0 sm:pt-0">
-        <div className="relative overflow-hidden rounded-3xl bg-[#0f2f37] p-8 text-white sm:p-14">
-          <div className="absolute -bottom-24 -right-16 h-72 w-72 rounded-full bg-forest/40" aria-hidden />
+        <div className="relative isolate overflow-hidden rounded-3xl bg-[#0f2f37] p-8 text-white sm:p-14">
+          <CampPhoto photo={photos.cabin} sizes="100vw" className="absolute inset-0 -z-20" />
+          <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#0f2f37]/95 via-[#0f2f37]/80 to-[#0f2f37]/30" aria-hidden />
           <div className="relative grid gap-8 lg:grid-cols-[1.4fr_1fr] lg:items-center">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Retreat centre</p>

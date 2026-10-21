@@ -29,7 +29,7 @@ export default async function ProgramPage({ params }: Params) {
 
   return (
     <>
-      <PageHero eyebrow={`${program.kind} · ${program.ages}`} title={program.name} intro={program.blurb}>
+      <PageHero eyebrow={`${program.kind} · ${program.ages}`} title={program.name} intro={program.blurb} photo={program.photo}>
         <Link
           href="/summer-camps"
           className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-white/80 hover:text-white"

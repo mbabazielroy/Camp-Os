@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { MapPin, Phone, Mail, ArrowRight } from "lucide-react";
 import { PageHero, Section } from "@/components/site/Section";
 import { camp, telHref } from "@/lib/site/content";
+import { photos } from "@/lib/site/photos";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -27,6 +28,7 @@ export default function ContactPage() {
       <PageHero
         eyebrow="Contact"
         title="Let's talk camp"
+        photo={photos.canoe}
         intro="Questions about registration, a retreat booking, or working with us this summer? We'd love to hear from you."
       />
       <Section>

@@ -1,6 +1,8 @@
 // Content for the public Mill Stream website. Everything a director updates each
 // season - dates, prices, contact details - lives in this one file.
 
+import { photos, type Photo } from "./photos";
+
 export const camp = {
   name: "Mill Stream Bible Camp & Retreat Centre",
   shortName: "Mill Stream",
@@ -41,6 +43,7 @@ export type Program = {
   // Overrides the default registration button when a program registers elsewhere.
   register?: { label: string; href: string };
   accent: "forest" | "primary" | "accent";
+  photo: Photo;
 };
 
 export const programs: Program[] = [
@@ -58,6 +61,7 @@ export const programs: Program[] = [
     sessions: ["July 19-21, 2026"],
     price: { earlyBird: 271, regular: 301, unit: "per session" },
     accent: "accent",
+    photo: photos.playing,
   },
   {
     slug: "day-campin",
@@ -73,6 +77,7 @@ export const programs: Program[] = [
     sessions: ["July 13-17, 2026", "August 10-14, 2026"],
     price: { earlyBird: 325, regular: 355, unit: "per week" },
     accent: "primary",
+    photo: photos.games,
   },
   {
     slug: "trekkin-camp",
@@ -88,6 +93,7 @@ export const programs: Program[] = [
     sessions: [],
     price: { earlyBird: 529, regular: 559, unit: "per week (2025 rate)" },
     accent: "forest",
+    photo: photos.campfire,
   },
   {
     slug: "trailblazin-camp",
@@ -103,6 +109,7 @@ export const programs: Program[] = [
     sessions: ["August 16-21, 2026"],
     price: { earlyBird: 549, regular: 579, unit: "per week" },
     accent: "primary",
+    photo: photos.hiking,
   },
   {
     slug: "handicamp",
@@ -118,6 +125,7 @@ export const programs: Program[] = [
     sessions: ["Late July 2026 - contact BCM for exact dates"],
     register: { label: "Ask BCM about Handi*Camp", href: "mailto:mission@bcmintl.ca" },
     accent: "forest",
+    photo: photos.river,
   },
 ];
 

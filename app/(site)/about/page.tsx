@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Heart, Church, Home, ShieldCheck } from "lucide-react";
 import { PageHero, Section, SectionHeading } from "@/components/site/Section";
 import { camp } from "@/lib/site/content";
+import { CampPhoto } from "@/components/site/CampPhoto";
+import { photos } from "@/lib/site/photos";
 
 export const metadata: Metadata = {
   title: "About",
@@ -16,6 +18,7 @@ export default function AboutPage() {
       <PageHero
         eyebrow="About Mill Stream"
         title={`Serving kids and families since ${camp.founded}`}
+        photo={photos.river}
         intro={`${camp.name} is a Bible-based, non-denominational camp on ${camp.acres} acres along the Pigeon River in ${camp.address.city}, Ontario.`}
       />
 
@@ -40,6 +43,19 @@ export default function AboutPage() {
               for safety, staffing and program quality.
             </p>
           </div>
+        </div>
+      </Section>
+
+      <Section className="pt-0 sm:pt-0">
+        <div className="grid gap-4 sm:grid-cols-3">
+          {[photos.games, photos.campfire, photos.woods].map((photo) => (
+            <CampPhoto
+              key={photo.src}
+              photo={photo}
+              sizes="(min-width: 640px) 33vw, 100vw"
+              className="aspect-[4/3] rounded-2xl shadow-card"
+            />
+          ))}
         </div>
       </Section>
 

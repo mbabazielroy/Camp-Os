@@ -1,3 +1,6 @@
+import { CampPhoto } from "./CampPhoto";
+import type { Photo } from "@/lib/site/photos";
+
 export function Section({
   children,
   className = "",
@@ -40,22 +43,33 @@ export function SectionHeading({
   );
 }
 
-// Banner for interior pages: title over the stream gradient with a wave edge.
+// Banner for interior pages: title over a camp photo washed in the stream
+// gradient, with a wave edge.
 export function PageHero({
   eyebrow,
   title,
   intro,
+  photo,
   children,
 }: {
   eyebrow?: string;
   title: string;
   intro?: string;
+  photo?: Photo;
   children?: React.ReactNode;
 }) {
   return (
-    <div className="relative overflow-hidden bg-stream text-white">
-      <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full bg-white/10" aria-hidden />
-      <div className="relative mx-auto max-w-6xl px-4 pb-20 pt-14 sm:px-6 sm:pb-28 sm:pt-20">
+    <div className="relative isolate overflow-hidden bg-stream text-white">
+      {photo ? (
+        <>
+          <CampPhoto photo={photo} priority className="absolute inset-0 -z-20" />
+          <div className="absolute inset-0 -z-10 bg-stream opacity-80 mix-blend-multiply" aria-hidden />
+          <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#0f2f37]/70 to-transparent" aria-hidden />
+        </>
+      ) : (
+        <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full bg-white/10" aria-hidden />
+      )}
+      <div className="relative mx-auto max-w-6xl px-4 pb-24 pt-16 sm:px-6 sm:pb-32 sm:pt-24">
         {eyebrow && (
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70">{eyebrow}</p>
         )}

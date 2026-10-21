@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { ArrowRight, CalendarRange, Users, Info, Check } from "lucide-react";
 import { PageHero, Section, SectionHeading } from "@/components/site/Section";
 import { camp, retreats, telHref } from "@/lib/site/content";
+import { CampPhoto } from "@/components/site/CampPhoto";
+import { photos } from "@/lib/site/photos";
 
 export const metadata: Metadata = {
   title: "Retreat centre",
@@ -20,6 +22,7 @@ export default function RetreatsPage() {
       <PageHero
         eyebrow="Retreat centre"
         title="A peaceful place for your group to gather"
+        photo={photos.cabin}
         intro={`Outside of summer, Mill Stream opens its ${camp.acres} acres along the Pigeon River to churches, schools, families and ministries.`}
       />
 
@@ -35,11 +38,18 @@ export default function RetreatsPage() {
         </div>
 
         <div className="mt-16 grid gap-12 lg:grid-cols-2">
-          <SectionHeading
-            eyebrow="Who comes here"
-            title="Built for groups of every kind"
-            intro="Accommodations, meeting space and a wide range of activities - with the river and forest just outside the door."
-          />
+          <div>
+            <SectionHeading
+              eyebrow="Who comes here"
+              title="Built for groups of every kind"
+              intro="Accommodations, meeting space and a wide range of activities - with the river and forest just outside the door."
+            />
+            <CampPhoto
+              photo={photos.river}
+              sizes="(min-width: 1024px) 50vw, 100vw"
+              className="mt-8 aspect-[16/10] rounded-2xl shadow-card"
+            />
+          </div>
           <ul className="grid gap-3 self-center">
             {retreats.groups.map((g) => (
               <li key={g} className="flex items-center gap-3 rounded-xl bg-surface-muted px-5 py-4 font-medium">

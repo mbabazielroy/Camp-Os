@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ArrowRight, GraduationCap, Clock, Users } from "lucide-react";
 import { PageHero, Section } from "@/components/site/Section";
 import { camp, leadership, season } from "@/lib/site/content";
+import { photos } from "@/lib/site/photos";
 
 export const metadata: Metadata = {
   title: "Leadership training",
@@ -20,6 +21,7 @@ export default function LeadershipPage() {
       <PageHero
         eyebrow={`Summer ${season.year}`}
         title={leadership.name}
+        photo={photos.hiking}
         intro="For teens who loved being campers and are ready to learn what it takes to lead."
       />
       <Section>

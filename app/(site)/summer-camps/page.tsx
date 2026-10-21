@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { PageHero, Section, SectionHeading } from "@/components/site/Section";
 import { ProgramCard } from "@/components/site/ProgramCard";
 import { camp, programs, season } from "@/lib/site/content";
+import { photos } from "@/lib/site/photos";
 
 export const metadata: Metadata = {
   title: "Summer camps",
@@ -18,6 +19,7 @@ export default function SummerCampsPage() {
       <PageHero
         eyebrow={`Summer ${season.year}`}
         title="Summer camps"
+        photo={photos.canoe}
         intro="Overnight and day camps for ages 5-15, plus Handi*Camp for young people with special needs. Every program is built around fun, friendship and the Bible."
       >
         <a
