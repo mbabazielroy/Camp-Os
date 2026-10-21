@@ -105,7 +105,7 @@ export default function App() {
             <WebView
               key={attempt}
               ref={webViewRef}
-              source={{ uri: APP_URL }}
+              source={{ uri: `${APP_URL.replace(/\/$/, '')}/dashboard` }}
               style={styles.webview}
               onLoadEnd={() => setLoaded(true)}
               onError={(e) => setError(e.nativeEvent.description || 'The page failed to load.')}

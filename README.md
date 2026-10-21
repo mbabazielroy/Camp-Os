@@ -8,6 +8,14 @@ replies grounded in your own camp knowledge base, but every reply waits for you 
 edit, and approve it. Even with Gmail connected, approved replies land in your Gmail
 **drafts** folder - the app has no send permission at all.
 
+## Public website
+
+The same app also serves the public Mill Stream website at `/` (summer camps, program pages,
+retreats, leadership training, about, contact). These pages are static, need no sign-in, and
+link to online registration. All dates, prices and contact details live in
+`lib/site/content.ts` - update that one file each season. Staff reach the admin app via the
+"Staff login" link in the footer, or `/dashboard` directly.
+
 ## Tech stack
 
 - Next.js (App Router) + TypeScript
@@ -87,6 +95,7 @@ for real App Store / Play Store builds later (via `eas build`).
 
 ## Project structure
 
+- `app/(site)` - the public website; content in `lib/site/content.ts`
 - `app/login` - sign in / sign up (signup auto-creates a camp or accepts an invite)
 - `app/(app)` - authenticated app shell and feature pages: `dashboard`, `tasks`,
   `email-assistant`, `knowledge-base`, `people`, `settings`
