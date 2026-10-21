@@ -25,6 +25,8 @@
   /* Accent: campfire amber */
   --color-accent: #d98d2b;
   --color-accent-soft: #f9ecd7;
+  /* Light campfire glow, for accents on dark photos */
+  --color-glow: #f3b97a;
 
   --color-danger: #b3452c;
   --color-danger-soft: #f8e4dd;
@@ -55,6 +57,7 @@
   --color-forest-soft: var(--color-forest-soft);
   --color-accent: var(--color-accent);
   --color-accent-soft: var(--color-accent-soft);
+  --color-glow: var(--color-glow);
   --color-danger: var(--color-danger);
   --color-danger-soft: var(--color-danger-soft);
   --color-warning: var(--color-warning);
@@ -62,6 +65,8 @@
   --color-muted: var(--color-muted);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  --font-script: var(--font-caveat), "Segoe Print", "Bradley Hand", cursive;
   --shadow-card: var(--shadow-card);
   --shadow-card-hover: var(--shadow-card-hover);
   --shadow-dock: var(--shadow-dock);
@@ -103,4 +108,10 @@ body {
   border-radius: 0.75rem;
   background: var(--color-surface-muted);
   animation: shimmer 1.6s ease-in-out infinite;
+}
+
+/* Public website: a faint paper grain over the page background. */
+.paper {
+  background-color: var(--background);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.24 0 0 0 0 0.3 0 0 0 0 0.27 0 0 0 0.07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }

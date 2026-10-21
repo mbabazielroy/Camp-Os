@@ -1,0 +1,16 @@
+{
+  // Opens the app in GitHub Codespaces with no setup: dependencies install on
+  // creation, the dev server starts on attach, and port 3000 opens in the browser.
+  // With no Supabase keys the admin side runs on sample data.
+  "name": "Mill Stream",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
+  "postCreateCommand": "npm install",
+  "postAttachCommand": "npm run dev",
+  "forwardPorts": [3000],
+  "portsAttributes": {
+    "3000": {
+      "label": "Mill Stream website",
+      "onAutoForward": "openBrowser"
+    }
+  }
+}

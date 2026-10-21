@@ -12,7 +12,18 @@ function redirectTo(request: NextRequest, pathname: string, search?: string) {
   return NextResponse.redirect(url);
 }
 
+// The public marketing website - no session needed, so skip the Supabase round trip.
+const SITE_PATHS = ["/summer-camps", "/retreats", "/leadership", "/about", "/contact"];
+
+function isSitePath(path: string) {
+  return path === "/" || SITE_PATHS.some((p) => path === p || path.startsWith(`${p}/`));
+}
+
 export async function updateSession(request: NextRequest) {
+  if (isSitePath(request.nextUrl.pathname)) {
+    return NextResponse.next({ request });
+  }
+
   const path = request.nextUrl.pathname;
   const isPublicPath = PUBLIC_PATHS.some((p) => path.startsWith(p));
 
@@ -21,7 +32,7 @@ export async function updateSession(request: NextRequest) {
   if (!isSupabaseConfigured()) {
     const inDemoSession = request.cookies.get(DEMO_COOKIE)?.value === "1";
 
-    if (!inDemoSession && !isPublicPath && path !== "/") {
+    if (!inDemoSession && !isPublicPath) {
       return redirectTo(request, "/login");
     }
     if (inDemoSession && path === "/login") {
@@ -55,7 +66,7 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user && !isPublicPath && path !== "/") {
+  if (!user && !isPublicPath) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
     loginUrl.searchParams.set("redirectTo", path);

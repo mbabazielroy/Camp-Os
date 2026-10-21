@@ -126,7 +126,8 @@ export default function App() {
             <WebView
               key={attempt}
               ref={webViewRef}
-              source={{ uri: url }}
+              // The root URL is the public website; the shell opens the camp office.
+              source={{ uri: `${url.replace(/\/$/, '')}/dashboard` }}
               style={styles.webview}
               onError={(e) => {
                 setReason(e.nativeEvent.description || 'The page failed to load.');
