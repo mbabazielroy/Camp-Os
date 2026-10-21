@@ -18,7 +18,7 @@ export default function AboutPage() {
       <PageHero
         eyebrow="About Mill Stream"
         title={`Serving kids and families since ${camp.founded}`}
-        photo={photos.river}
+        photo={photos.friends}
         intro={`${camp.name} is a Bible-based, non-denominational camp on ${camp.acres} acres along the Pigeon River in ${camp.address.city}, Ontario.`}
       />
 
@@ -48,7 +48,7 @@ export default function AboutPage() {
 
       <Section className="pt-0 sm:pt-0">
         <div className="grid gap-4 sm:grid-cols-3">
-          {[photos.games, photos.campfire, photos.woods].map((photo) => (
+          {[photos.crafts, photos.worship, photos.woods].map((photo) => (
             <CampPhoto
               key={photo.src}
               photo={photo}

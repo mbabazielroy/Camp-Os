@@ -125,7 +125,7 @@ export const programs: Program[] = [
     sessions: ["Late July 2026 - contact BCM for exact dates"],
     register: { label: "Ask BCM about Handi*Camp", href: "mailto:mission@bcmintl.ca" },
     accent: "forest",
-    photo: photos.river,
+    photo: photos.together,
   },
 ];
 

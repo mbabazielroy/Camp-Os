@@ -31,8 +31,8 @@ const gallery = [
   { photo: photos.waterfront, caption: "Waterfront", className: "col-span-2 row-span-2" },
   { photo: photos.campfire, caption: "Campfire nights", className: "" },
   { photo: photos.games, caption: "Big field games", className: "" },
-  { photo: photos.woods, caption: "Exploring the woods", className: "" },
-  { photo: photos.cabin, caption: "Cabin life", className: "" },
+  { photo: photos.crafts, caption: "Crafts & creativity", className: "" },
+  { photo: photos.friends, caption: "Friends for life", className: "" },
 ];
 
 const pillars = [
@@ -254,7 +254,7 @@ export default function HomePage() {
       <Section className="pt-0 sm:pt-0">
         <div className="grid gap-12 rounded-3xl bg-surface p-6 shadow-card sm:p-12 lg:grid-cols-[1fr_1.1fr] lg:items-center">
           <CampPhoto
-            photo={photos.campfire}
+            photo={photos.smores}
             sizes="(min-width: 1024px) 45vw, 100vw"
             className="aspect-[4/3] rounded-2xl lg:aspect-[4/5]"
           />
@@ -284,7 +284,7 @@ export default function HomePage() {
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <div className="relative">
             <CampPhoto
-              photo={photos.cabin}
+              photo={photos.bibleStudy}
               sizes="(min-width: 1024px) 50vw, 100vw"
               className="aspect-[4/3] rounded-3xl shadow-card-hover"
             />

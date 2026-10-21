@@ -22,7 +22,7 @@ export default function RetreatsPage() {
       <PageHero
         eyebrow="Retreat centre"
         title="A peaceful place for your group to gather"
-        photo={photos.cabin}
+        photo={photos.bibleStudy}
         intro={`Outside of summer, Mill Stream opens its ${camp.acres} acres along the Pigeon River to churches, schools, families and ministries.`}
       />
 
@@ -45,7 +45,7 @@ export default function RetreatsPage() {
               intro="Accommodations, meeting space and a wide range of activities - with the river and forest just outside the door."
             />
             <CampPhoto
-              photo={photos.river}
+              photo={photos.worship}
               sizes="(min-width: 1024px) 50vw, 100vw"
               className="mt-8 aspect-[16/10] rounded-2xl shadow-card"
             />
