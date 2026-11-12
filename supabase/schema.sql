@@ -55,27 +55,40 @@ as $$
   select camp_id from public.profiles where id = auth.uid();
 $$;
 
+-- Helper: is the current user a director of their camp?
+create or replace function public.is_camp_director()
+returns boolean
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select exists (
+    select 1 from public.profiles
+    where id = auth.uid() and role = 'director' and camp_id is not null
+  );
+$$;
+
 alter table public.camps enable row level security;
 
 create policy "Members can view their camp" on public.camps
   for select using (id = public.user_camp_id());
 create policy "Directors can update their camp" on public.camps
-  for update using (
-    id = public.user_camp_id()
-    and exists (
-      select 1 from public.profiles
-      where id = auth.uid() and role = 'director'
-    )
-  );
+  for update using (id = public.user_camp_id() and public.is_camp_director())
+  with check (id = public.user_camp_id());
 
 alter table public.profiles enable row level security;
 
 create policy "Users can view profiles in their camp" on public.profiles
   for select using (id = auth.uid() or camp_id = public.user_camp_id());
 create policy "Users can update their own profile" on public.profiles
-  for update using (id = auth.uid());
-create policy "Users can insert their own profile" on public.profiles
-  for insert with check (id = auth.uid());
+  for update using (id = auth.uid()) with check (id = auth.uid());
+
+-- Profiles are created only by the signup trigger, and users may change only
+-- their display name. camp_id and role are never writable from the API:
+-- otherwise staff could promote themselves to director or join another camp.
+revoke insert, update, delete on public.profiles from anon, authenticated;
+grant update (full_name) on public.profiles to authenticated;
 
 -- ---------------------------------------------------------------------------
 -- camp_invites: email invites so staff can join an existing camp
@@ -93,9 +106,15 @@ create table if not exists public.camp_invites (
 
 alter table public.camp_invites enable row level security;
 
-create policy "Members manage their camp invites" on public.camp_invites
-  for all using (camp_id = public.user_camp_id())
+create policy "Members can view their camp invites" on public.camp_invites
+  for select using (camp_id = public.user_camp_id());
+create policy "Directors create invites" on public.camp_invites
+  for insert with check (camp_id = public.user_camp_id() and public.is_camp_director());
+create policy "Directors update invites" on public.camp_invites
+  for update using (camp_id = public.user_camp_id() and public.is_camp_director())
   with check (camp_id = public.user_camp_id());
+create policy "Directors delete invites" on public.camp_invites
+  for delete using (camp_id = public.user_camp_id() and public.is_camp_director());
 
 create index if not exists camp_invites_email_idx on public.camp_invites (lower(email));
 
