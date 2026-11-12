@@ -111,6 +111,13 @@ See [`mobile/README.md`](mobile/README.md) for troubleshooting (firewall, Codesp
 tunnel mode, Expo Go version mismatches, Windows `node_modules` errors) and for building a
 real App Store / Play Store app with `eas build`.
 
+## Checks
+
+`npm run verify` runs everything CI runs: lint, typecheck, build, the database
+row-level-security tests (`npm run test:db`, needs PostgreSQL server binaries) and the
+Playwright end-to-end tests in demo mode (`npm run test:e2e`; run
+`npx playwright install chromium` once first). The launch plan lives in `SPEC.md`.
+
 ## Project structure
 
 - `app/login` - sign in / sign up (signup auto-creates a camp or accepts an invite)
