@@ -1,0 +1,55 @@
+{
+  "id": "evt_TestSubDeleted",
+  "object": "event",
+  "api_version": "2026-10-28.endive",
+  "created": 1794000000,
+  "data": {
+    "object": {
+      "id": "sub_TestCamp001",
+      "object": "subscription",
+      "cancel_at_period_end": false,
+      "canceled_at": 1794100000,
+      "collection_method": "charge_automatically",
+      "created": 1793900000,
+      "currency": "cad",
+      "customer": "cus_TestCamp001",
+      "items": {
+        "object": "list",
+        "data": [
+          {
+            "id": "si_TestCamp001",
+            "object": "subscription_item",
+            "price": {
+              "id": "price_TestMonthly",
+              "object": "price",
+              "currency": "cad",
+              "recurring": {
+                "interval": "month",
+                "interval_count": 1
+              },
+              "unit_amount": 7900
+            },
+            "quantity": 1
+          }
+        ],
+        "has_more": false,
+        "url": "/v1/subscription_items?subscription=sub_TestCamp001"
+      },
+      "livemode": false,
+      "metadata": {
+        "camp_id": "11111111-2222-3333-4444-555555555555"
+      },
+      "status": "canceled",
+      "trial_end": null,
+      "trial_start": null,
+      "ended_at": 1794100000
+    }
+  },
+  "livemode": false,
+  "pending_webhooks": 1,
+  "request": {
+    "id": null,
+    "idempotency_key": null
+  },
+  "type": "customer.subscription.deleted"
+}

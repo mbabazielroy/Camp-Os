@@ -111,9 +111,27 @@ See [`mobile/README.md`](mobile/README.md) for troubleshooting (firewall, Codesp
 tunnel mode, Expo Go version mismatches, Windows `node_modules` errors) and for building a
 real App Store / Play Store app with `eas build`.
 
+## Billing (Stripe)
+
+One plan: CA$79/month per camp, with a 30-day free trial that needs no card. Without
+Stripe keys, `/settings/billing` says "Billing not configured" and nothing is limited.
+To turn it on:
+
+1. In Stripe, create a product with a recurring CA$79/month price and copy its
+   `price_...` id into `STRIPE_PRICE_ID`. To change the price later, create a new price
+   and update this env var.
+2. Add a webhook endpoint at `<your-app-url>/api/stripe/webhook` for
+   `checkout.session.completed`, `customer.subscription.updated` and
+   `customer.subscription.deleted`; put its signing secret in `STRIPE_WEBHOOK_SECRET`.
+3. Turn on the Customer Portal (Settings -> Billing -> Customer portal).
+4. Set `STRIPE_SECRET_KEY` and `SUPABASE_SERVICE_ROLE_KEY` (server-only).
+
+When a trial ends without an active subscription, the camp becomes read-only: nothing is
+deleted, and billing and sign-out keep working.
+
 ## Checks
 
-`npm run verify` runs everything CI runs: lint, typecheck, build, the database
+`npm run verify` runs everything CI runs: lint, typecheck, unit tests, build, the database
 row-level-security tests (`npm run test:db`, needs PostgreSQL server binaries) and the
 Playwright end-to-end tests in demo mode (`npm run test:e2e`; run
 `npx playwright install chromium` once first). The launch plan lives in `SPEC.md`.

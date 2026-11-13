@@ -78,6 +78,18 @@ export default async function SettingsPage({
         </Card>
       </section>
 
+      {isDirector && (
+        <section className="mb-6">
+          <h2 className="font-semibold text-foreground mb-2">Billing</h2>
+          <Card className="p-4 flex items-center justify-between gap-3">
+            <p className="text-sm text-foreground">Plan, free trial and payment details.</p>
+            <LinkButton href="/settings/billing" size="sm" variant="secondary">
+              Billing
+            </LinkButton>
+          </Card>
+        </section>
+      )}
+
       <section className="mb-6">
         <h2 className="font-semibold text-foreground mb-2">Gmail</h2>
         <Card className="p-4">

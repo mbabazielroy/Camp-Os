@@ -37,6 +37,10 @@ export default defineConfig({
       OPENAI_API_KEY: "",
       GOOGLE_CLIENT_ID: "",
       GOOGLE_CLIENT_SECRET: "",
+      STRIPE_SECRET_KEY: "",
+      STRIPE_WEBHOOK_SECRET: "",
+      STRIPE_PRICE_ID: "",
+      SUPABASE_SERVICE_ROLE_KEY: "",
     },
   },
 });

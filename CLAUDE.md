@@ -7,7 +7,9 @@ Supabase (auth + Postgres with RLS), OpenAI. Product plan and milestones: `SPEC.
 ## Commands
 
 - `npm run dev`: runs with no keys in **demo mode** (in-memory sample data, offline draft writer)
-- `npm run verify`: lint + typecheck + build + DB tests + e2e. Must pass before any PR
+- `npm run verify`: lint + typecheck + unit tests + build + DB tests + e2e. Must pass before any PR
+- `npm run test:unit`: `node --test` (via tsx) over `tests/unit/*.test.ts`, e.g. the Stripe
+  webhook handler against event fixtures in `tests/unit/fixtures/stripe`
 - `npm run test:db`: throwaway Postgres + `tests/db/supabase-shim.sql` + `supabase/schema.sql`,
   then `tests/db/*.test.sql`. Needs Postgres server binaries (`initdb`)
 - `npm run test:e2e`: Playwright against `next start` in demo mode (run `npm run build` first).

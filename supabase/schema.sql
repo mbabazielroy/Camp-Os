@@ -69,6 +69,22 @@ as $$
   );
 $$;
 
+-- Billing (Stripe). One plan per camp; every camp starts on a 30-day trial
+-- with no card. Members can read these columns, but only the service role
+-- (the Stripe webhook) may write them: see the column grants below.
+alter table public.camps
+  add column if not exists subscription_status text not null default 'trialing'
+    check (subscription_status in ('trialing', 'active', 'past_due', 'canceled'));
+alter table public.camps
+  add column if not exists trial_ends_at timestamptz not null default (now() + interval '30 days');
+alter table public.camps add column if not exists stripe_customer_id text;
+alter table public.camps add column if not exists stripe_subscription_id text;
+
+create unique index if not exists camps_stripe_customer_id_idx
+  on public.camps (stripe_customer_id);
+create unique index if not exists camps_stripe_subscription_id_idx
+  on public.camps (stripe_subscription_id);
+
 alter table public.camps enable row level security;
 
 create policy "Members can view their camp" on public.camps
@@ -76,6 +92,12 @@ create policy "Members can view their camp" on public.camps
 create policy "Directors can update their camp" on public.camps
   for update using (id = public.user_camp_id() and public.is_camp_director())
   with check (id = public.user_camp_id());
+
+-- Camps are created only by the signup trigger, and directors may change only
+-- the name. Billing columns are written by the Stripe webhook through the
+-- service role, so a director can't mark their own camp as paid.
+revoke insert, update, delete on public.camps from anon, authenticated;
+grant update (name) on public.camps to authenticated;
 
 alter table public.profiles enable row level security;
 
@@ -141,8 +163,13 @@ begin
 
     update public.camp_invites set accepted_at = now() where id = invite.id;
   else
-    insert into public.camps (name, owner_id)
-    values (coalesce(nullif(new.raw_user_meta_data ->> 'camp_name', ''), 'My Camp'), new.id)
+    insert into public.camps (name, owner_id, subscription_status, trial_ends_at)
+    values (
+      coalesce(nullif(new.raw_user_meta_data ->> 'camp_name', ''), 'My Camp'),
+      new.id,
+      'trialing',
+      now() + interval '30 days'
+    )
     returning id into new_camp_id;
 
     insert into public.profiles (id, full_name, camp_id, role)

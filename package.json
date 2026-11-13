@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "test:db": "bash tests/db/run.sh",
     "test:e2e": "playwright test",
-    "verify": "npm run lint && npm run typecheck && npm run build && npm run test:db && npm run test:e2e"
+    "verify": "npm run lint && npm run typecheck && npm run test:unit && npm run build && npm run test:db && npm run test:e2e",
+    "test:unit": "node --import tsx --test tests/unit/*.test.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",
@@ -21,7 +22,9 @@
     "next": "16.2.9",
     "openai": "^6.45.0",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "server-only": "^0.0.1",
+    "stripe": "^23.1.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
@@ -33,6 +36,7 @@
     "eslint-config-next": "16.2.9",
     "qrcode-terminal": "^0.12.0",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   }
 }

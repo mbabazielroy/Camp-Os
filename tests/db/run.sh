@@ -20,11 +20,11 @@ if [ "$(id -u)" = 0 ]; then
   chown postgres "$DATA" "$SOCK"
   AS=(runuser -u postgres --)
 fi
-cleanup() { "${AS[@]}" pg_ctl -D "$DATA" -m immediate stop >/dev/null 2>&1 || true; rm -rf "$DATA" "$SOCK"; }
+cleanup() { ${AS[@]+"${AS[@]}"} pg_ctl -D "$DATA" -m immediate stop >/dev/null 2>&1 || true; rm -rf "$DATA" "$SOCK"; }
 trap cleanup EXIT
 
-"${AS[@]}" env PATH="$PATH" initdb -D "$DATA" -U postgres --auth=trust >/dev/null
-"${AS[@]}" env PATH="$PATH" pg_ctl -D "$DATA" -o "-k $SOCK -c listen_addresses=''" -l "$DATA/log" -w start >/dev/null
+${AS[@]+"${AS[@]}"} env PATH="$PATH" initdb -D "$DATA" -U postgres --auth=trust >/dev/null
+${AS[@]+"${AS[@]}"} env PATH="$PATH" pg_ctl -D "$DATA" -o "-k $SOCK -c listen_addresses=''" -l "$DATA/log" -w start >/dev/null
 
 export PGOPTIONS="-c client_min_messages=warning"
 PSQL=(psql -h "$SOCK" -U postgres -d postgres -v ON_ERROR_STOP=1 -q)

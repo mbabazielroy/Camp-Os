@@ -142,6 +142,132 @@ begin
   end if;
 end $$;
 
+-- ------------------------------------------------------------ billing (M1)
+-- Signup starts a 30-day trial.
+do $$
+begin
+  if (select subscription_status from public.camps where id = (select camp_a from public._ids)) <> 'trialing' then
+    raise exception 'new camp should start in trialing';
+  end if;
+  if (select trial_ends_at from public.camps where id = (select camp_a from public._ids))
+     not between now() + interval '29 days 23 hours' and now() + interval '30 days 1 hour' then
+    raise exception 'handle_new_user should set trial_ends_at to signup + 30 days';
+  end if;
+end $$;
+
+-- Director A: can read billing, can't write it (only the service role can).
+begin;
+set local role authenticated;
+set local request.jwt.claim.sub = 'aaaaaaaa-0000-0000-0000-000000000001';
+do $$
+declare n int;
+begin
+  if (select subscription_status from public.camps) is distinct from 'trialing' then
+    raise exception 'director A cannot read their camp subscription_status';
+  end if;
+  perform trial_ends_at, stripe_customer_id, stripe_subscription_id from public.camps;
+
+  -- Renaming the camp still works.
+  update public.camps set name = 'Camp A renamed' where id = (select camp_a from public._ids);
+  get diagnostics n = row_count;
+  if n <> 1 then raise exception 'director A could not rename their own camp'; end if;
+
+  begin
+    update public.camps set subscription_status = 'active'
+    where id = (select camp_a from public._ids);
+    raise exception 'director A set their own subscription_status';
+  exception when insufficient_privilege then null;
+  end;
+
+  begin
+    update public.camps set trial_ends_at = now() + interval '10 years'
+    where id = (select camp_a from public._ids);
+    raise exception 'director A extended their own trial';
+  exception when insufficient_privilege then null;
+  end;
+
+  begin
+    update public.camps set stripe_customer_id = 'cus_stolen', stripe_subscription_id = 'sub_stolen'
+    where id = (select camp_a from public._ids);
+    raise exception 'director A set their own Stripe ids';
+  exception when insufficient_privilege then null;
+  end;
+
+  -- Nor can they mark camp B as paid, or create a camp of their own.
+  begin
+    update public.camps set subscription_status = 'canceled'
+    where id = (select camp_b from public._ids);
+    raise exception 'director A changed camp B billing';
+  exception when insufficient_privilege then null;
+  end;
+
+  begin
+    insert into public.camps (name, owner_id, subscription_status)
+    values ('Free camp', 'aaaaaaaa-0000-0000-0000-000000000001', 'active');
+    raise exception 'director A inserted a camp';
+  exception when insufficient_privilege then null;
+  end;
+end $$;
+commit;
+
+-- Staff A: can read their camp's billing status, can't change it.
+begin;
+set local role authenticated;
+set local request.jwt.claim.sub = 'aaaaaaaa-0000-0000-0000-000000000002';
+do $$
+begin
+  if (select subscription_status from public.camps) is distinct from 'trialing' then
+    raise exception 'staff A cannot read their camp subscription_status';
+  end if;
+  begin
+    update public.camps set subscription_status = 'active';
+    raise exception 'staff A set the camp subscription_status';
+  exception when insufficient_privilege then null;
+  end;
+end $$;
+commit;
+
+-- Director B can't see camp A's billing columns.
+begin;
+set local role authenticated;
+set local request.jwt.claim.sub = 'bbbbbbbb-0000-0000-0000-000000000001';
+do $$
+begin
+  if exists (select 1 from public.camps where id = (select camp_a from public._ids)) then
+    raise exception 'director B can read camp A billing';
+  end if;
+end $$;
+commit;
+
+-- The service role (Stripe webhook) can write billing columns.
+begin;
+set local role service_role;
+do $$
+declare n int;
+begin
+  update public.camps
+  set subscription_status = 'active', stripe_customer_id = 'cus_B', stripe_subscription_id = 'sub_B'
+  where id = (select camp_b from public._ids);
+  get diagnostics n = row_count;
+  if n <> 1 then raise exception 'service role could not update camp billing'; end if;
+end $$;
+commit;
+
+-- Checked as the superuser, after the attempts above.
+do $$
+begin
+  if (select subscription_status from public.camps where id = (select camp_a from public._ids)) <> 'trialing'
+     or (select stripe_customer_id from public.camps where id = (select camp_a from public._ids)) is not null then
+    raise exception 'camp A billing changed without the service role';
+  end if;
+  if (select subscription_status from public.camps where id = (select camp_b from public._ids)) <> 'active' then
+    raise exception 'service role update to camp B billing did not stick';
+  end if;
+  if (select name from public.camps where id = (select camp_a from public._ids)) <> 'Camp A renamed' then
+    raise exception 'director rename did not stick';
+  end if;
+end $$;
+
 -- ----------------------------------------------- signed-out visitor (anon)
 begin;
 set local role anon;

@@ -25,6 +25,7 @@ export type EmailCategory =
 export type EmailUrgency = "low" | "medium" | "high" | "urgent";
 export type EmailDraftStatus = "pending" | "approved" | "dismissed";
 export type EmailSource = "manual" | "gmail";
+export type SubscriptionStatus = "trialing" | "active" | "past_due" | "canceled";
 
 export interface Database {
   public: {
@@ -35,6 +36,10 @@ export interface Database {
           name: string;
           owner_id: string;
           created_at: string;
+          subscription_status: SubscriptionStatus;
+          trial_ends_at: string;
+          stripe_customer_id: string | null;
+          stripe_subscription_id: string | null;
         };
         Insert: Partial<Database["public"]["Tables"]["camps"]["Row"]> & {
           owner_id: string;

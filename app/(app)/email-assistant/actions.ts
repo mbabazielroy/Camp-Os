@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireCamp } from "@/lib/auth";
+import { requireWritableCamp } from "@/lib/auth";
 import { analyzeAndDraftEmail, type EmailAnalysis } from "@/lib/ai/email";
 import { getGmailConnection } from "@/lib/gmail-account";
 import { listInboxMessages, getMessage, createReplyDraft } from "@/lib/gmail";
@@ -40,7 +40,7 @@ function analysisFields(analysis: EmailAnalysis) {
 }
 
 export async function createEmailDraft(formData: FormData) {
-  const { supabase, campId } = await requireCamp();
+  const { supabase, campId } = await requireWritableCamp();
 
   const originalEmail = field(formData, "original_email").trim();
   if (!originalEmail) {
@@ -94,7 +94,7 @@ export async function createEmailDraft(formData: FormData) {
 }
 
 export async function saveEmailDraft(id: string, formData: FormData) {
-  const { supabase, campId } = await requireCamp();
+  const { supabase, campId } = await requireWritableCamp();
 
   const editedDraft = field(formData, "edited_draft");
   const category = (field(formData, "category") || "other") as EmailCategory;
@@ -151,7 +151,7 @@ export async function saveEmailDraft(id: string, formData: FormData) {
 }
 
 export async function regenerateDraft(id: string, formData: FormData) {
-  const { supabase, campId } = await requireCamp();
+  const { supabase, campId } = await requireWritableCamp();
 
   const { data: draft } = await supabase
     .from("email_drafts")
@@ -194,7 +194,7 @@ export async function regenerateDraft(id: string, formData: FormData) {
 }
 
 export async function deleteEmailDraft(id: string) {
-  const { supabase, campId } = await requireCamp();
+  const { supabase, campId } = await requireWritableCamp();
 
   await supabase.from("email_drafts").delete().eq("id", id).eq("camp_id", campId);
 
@@ -204,7 +204,7 @@ export async function deleteEmailDraft(id: string) {
 
 // One-tap accept of the AI's suggested follow-up task.
 export async function acceptSuggestedTask(id: string) {
-  const { supabase, campId, userId } = await requireCamp();
+  const { supabase, campId, userId } = await requireWritableCamp();
 
   const { data: draft } = await supabase
     .from("email_drafts")
@@ -237,7 +237,7 @@ export async function acceptSuggestedTask(id: string) {
 // Pulls recent Gmail inbox messages into the assistant, skipping anything
 // already imported, and runs AI triage on each new one.
 export async function syncGmailInbox() {
-  const { supabase, campId } = await requireCamp();
+  const { supabase, campId } = await requireWritableCamp();
 
   const connection = await getGmailConnection(supabase, campId);
   if (!connection) {

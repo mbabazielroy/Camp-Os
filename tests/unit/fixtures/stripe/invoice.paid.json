@@ -1,0 +1,23 @@
+{
+  "id": "evt_TestInvoicePaid",
+  "object": "event",
+  "api_version": "2026-10-28.endive",
+  "created": 1794000000,
+  "data": {
+    "object": {
+      "id": "in_TestCamp001",
+      "object": "invoice",
+      "amount_paid": 7900,
+      "currency": "cad",
+      "customer": "cus_TestCamp001",
+      "status": "paid"
+    }
+  },
+  "livemode": false,
+  "pending_webhooks": 1,
+  "request": {
+    "id": null,
+    "idempotency_key": null
+  },
+  "type": "invoice.paid"
+}
