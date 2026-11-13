@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireCamp } from "@/lib/auth";
+import { requireWritableCamp } from "@/lib/auth";
 import { field } from "@/lib/form";
 
 function revalidatePeople() {
@@ -14,7 +14,7 @@ function revalidatePeople() {
 // --- Guardians -------------------------------------------------------------
 
 export async function createGuardian(formData: FormData) {
-  const { supabase, campId } = await requireCamp();
+  const { supabase, campId } = await requireWritableCamp();
 
   const firstName = field(formData, "first_name").trim();
   const lastName = field(formData, "last_name").trim();
@@ -34,7 +34,7 @@ export async function createGuardian(formData: FormData) {
 }
 
 export async function updateGuardian(id: string, formData: FormData) {
-  const { supabase, campId } = await requireCamp();
+  const { supabase, campId } = await requireWritableCamp();
 
   const firstName = field(formData, "first_name").trim();
   const lastName = field(formData, "last_name").trim();
@@ -58,7 +58,7 @@ export async function updateGuardian(id: string, formData: FormData) {
 }
 
 export async function deleteGuardian(id: string) {
-  const { supabase, campId } = await requireCamp();
+  const { supabase, campId } = await requireWritableCamp();
   await supabase.from("guardians").delete().eq("id", id).eq("camp_id", campId);
   revalidatePeople();
   redirect("/people/guardians");
@@ -67,7 +67,7 @@ export async function deleteGuardian(id: string) {
 // --- Campers -----------------------------------------------------------------
 
 export async function createCamper(formData: FormData) {
-  const { supabase, campId } = await requireCamp();
+  const { supabase, campId } = await requireWritableCamp();
 
   const firstName = field(formData, "first_name").trim();
   const lastName = field(formData, "last_name").trim();
@@ -91,7 +91,7 @@ export async function createCamper(formData: FormData) {
 }
 
 export async function updateCamper(id: string, formData: FormData) {
-  const { supabase, campId } = await requireCamp();
+  const { supabase, campId } = await requireWritableCamp();
 
   const firstName = field(formData, "first_name").trim();
   const lastName = field(formData, "last_name").trim();
@@ -119,7 +119,7 @@ export async function updateCamper(id: string, formData: FormData) {
 }
 
 export async function deleteCamper(id: string) {
-  const { supabase, campId } = await requireCamp();
+  const { supabase, campId } = await requireWritableCamp();
   await supabase.from("campers").delete().eq("id", id).eq("camp_id", campId);
   revalidatePeople();
   redirect("/people/campers");
@@ -128,7 +128,7 @@ export async function deleteCamper(id: string) {
 // --- Staff -------------------------------------------------------------------
 
 export async function createStaff(formData: FormData) {
-  const { supabase, campId } = await requireCamp();
+  const { supabase, campId } = await requireWritableCamp();
 
   const firstName = field(formData, "first_name").trim();
   const lastName = field(formData, "last_name").trim();
@@ -148,7 +148,7 @@ export async function createStaff(formData: FormData) {
 }
 
 export async function updateStaff(id: string, formData: FormData) {
-  const { supabase, campId } = await requireCamp();
+  const { supabase, campId } = await requireWritableCamp();
 
   const firstName = field(formData, "first_name").trim();
   const lastName = field(formData, "last_name").trim();
@@ -172,7 +172,7 @@ export async function updateStaff(id: string, formData: FormData) {
 }
 
 export async function deleteStaff(id: string) {
-  const { supabase, campId } = await requireCamp();
+  const { supabase, campId } = await requireWritableCamp();
   await supabase.from("staff").delete().eq("id", id).eq("camp_id", campId);
   revalidatePeople();
   redirect("/people/staff");

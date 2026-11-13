@@ -2,13 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireCamp } from "@/lib/auth";
+import { requireWritableCamp } from "@/lib/auth";
 import { KB_STARTERS } from "@/lib/kb-starters";
 import type { KnowledgeCategory } from "@/lib/supabase/database.types";
 import { field } from "@/lib/form";
 
 export async function createKnowledgeEntry(formData: FormData) {
-  const { supabase, campId } = await requireCamp();
+  const { supabase, campId } = await requireWritableCamp();
 
   const title = field(formData, "title").trim();
   const content = field(formData, "content").trim();
@@ -27,7 +27,7 @@ export async function createKnowledgeEntry(formData: FormData) {
 }
 
 export async function updateKnowledgeEntry(id: string, formData: FormData) {
-  const { supabase, campId } = await requireCamp();
+  const { supabase, campId } = await requireWritableCamp();
 
   const title = field(formData, "title").trim();
   const content = field(formData, "content").trim();
@@ -45,7 +45,7 @@ export async function updateKnowledgeEntry(id: string, formData: FormData) {
 }
 
 export async function deleteKnowledgeEntry(id: string) {
-  const { supabase, campId } = await requireCamp();
+  const { supabase, campId } = await requireWritableCamp();
 
   await supabase.from("knowledge_base").delete().eq("id", id).eq("camp_id", campId);
 
@@ -56,7 +56,7 @@ export async function deleteKnowledgeEntry(id: string) {
 // Adds the starter pack of common camp policies for the director to edit.
 // Skips any starter whose title already exists so it can't create duplicates.
 export async function addStarterPack() {
-  const { supabase, campId } = await requireCamp();
+  const { supabase, campId } = await requireWritableCamp();
 
   const { data: existing } = await supabase
     .from("knowledge_base")

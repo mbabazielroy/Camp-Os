@@ -4,6 +4,8 @@ import { Sidebar } from "@/components/nav/Sidebar";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { TopBar } from "@/components/nav/TopBar";
 import { DemoBanner } from "@/components/DemoBanner";
+import { ReadOnlyBanner } from "@/components/ReadOnlyBanner";
+import { getCampBilling } from "@/lib/auth";
 
 export default async function AppLayout({
   children,
@@ -26,7 +28,9 @@ export default async function AppLayout({
     .maybeSingle();
 
   let campName: string | null = null;
+  let readOnly = false;
   if (profile?.camp_id) {
+    readOnly = (await getCampBilling(supabase, profile.camp_id))?.readOnly ?? false;
     const { data: camp } = await supabase
       .from("camps")
       .select("name")
@@ -40,6 +44,7 @@ export default async function AppLayout({
       <Sidebar campName={campName} email={user.email ?? null} />
       <div className="flex-1 flex flex-col min-w-0">
         <DemoBanner />
+        {readOnly && <ReadOnlyBanner />}
         <TopBar campName={campName} />
         <main className="flex-1 px-4 py-5 md:px-8 md:py-8 pb-28 md:pb-8 max-w-3xl w-full mx-auto md:mx-0">
           {children}

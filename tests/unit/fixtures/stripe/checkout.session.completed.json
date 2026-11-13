@@ -1,0 +1,36 @@
+{
+  "id": "evt_TestCheckoutPaid",
+  "object": "event",
+  "api_version": "2026-10-28.endive",
+  "created": 1794000000,
+  "data": {
+    "object": {
+      "id": "cs_test_paid",
+      "object": "checkout.session",
+      "amount_subtotal": 7900,
+      "amount_total": 7900,
+      "client_reference_id": "11111111-2222-3333-4444-555555555555",
+      "currency": "cad",
+      "customer": "cus_TestCamp001",
+      "customer_email": "director@example.com",
+      "livemode": false,
+      "metadata": {
+        "camp_id": "11111111-2222-3333-4444-555555555555"
+      },
+      "mode": "subscription",
+      "payment_status": "paid",
+      "status": "complete",
+      "subscription": "sub_TestCamp001",
+      "success_url": "https://campflow.example/settings/billing?checkout=success",
+      "cancel_url": "https://campflow.example/settings/billing",
+      "url": null
+    }
+  },
+  "livemode": false,
+  "pending_webhooks": 1,
+  "request": {
+    "id": null,
+    "idempotency_key": null
+  },
+  "type": "checkout.session.completed"
+}

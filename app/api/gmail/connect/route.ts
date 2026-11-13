@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { randomBytes } from "crypto";
-import { requireCamp } from "@/lib/auth";
+import { requireWritableCamp } from "@/lib/auth";
 import { buildAuthUrl, isGmailConfigured } from "@/lib/gmail";
 
 export async function GET(request: NextRequest) {
@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
   }
 
   // Ensures the user is signed in before starting OAuth.
-  await requireCamp();
+  await requireWritableCamp();
 
   const state = randomBytes(16).toString("hex");
   const redirectUri = new URL("/api/gmail/callback", request.url).toString();

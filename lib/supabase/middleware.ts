@@ -3,7 +3,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { isSupabaseConfigured } from "@/lib/env";
 import { DEMO_COOKIE } from "@/lib/demo/client";
 
-const PUBLIC_PATHS = ["/login", "/auth", "/setup"];
+// The Stripe webhook has no user session; it authenticates by signature.
+const PUBLIC_PATHS = ["/login", "/auth", "/setup", "/api/stripe/webhook"];
 
 function redirectTo(request: NextRequest, pathname: string, search?: string) {
   const url = request.nextUrl.clone();

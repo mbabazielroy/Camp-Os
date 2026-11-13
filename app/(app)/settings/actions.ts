@@ -2,11 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireCamp } from "@/lib/auth";
+import { requireWritableCamp } from "@/lib/auth";
 import { field } from "@/lib/form";
 
 export async function updateCampName(formData: FormData) {
-  const { supabase, campId, role } = await requireCamp();
+  const { supabase, campId, role } = await requireWritableCamp();
   if (role !== "director") return;
 
   const name = field(formData, "name").trim();
@@ -19,7 +19,7 @@ export async function updateCampName(formData: FormData) {
 }
 
 export async function inviteMember(formData: FormData) {
-  const { supabase, campId, userId, role } = await requireCamp();
+  const { supabase, campId, userId, role } = await requireWritableCamp();
   if (role !== "director") {
     redirect("/settings?error=" + encodeURIComponent("Only directors can invite teammates."));
   }
@@ -57,7 +57,7 @@ export async function inviteMember(formData: FormData) {
 }
 
 export async function revokeInvite(id: string) {
-  const { supabase, campId, role } = await requireCamp();
+  const { supabase, campId, role } = await requireWritableCamp();
   if (role !== "director") return;
 
   await supabase
@@ -71,7 +71,7 @@ export async function revokeInvite(id: string) {
 }
 
 export async function disconnectGmail() {
-  const { supabase, campId } = await requireCamp();
+  const { supabase, campId } = await requireWritableCamp();
 
   await supabase.from("gmail_accounts").delete().eq("camp_id", campId);
 

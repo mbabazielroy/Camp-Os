@@ -26,6 +26,10 @@ export function buildSeed(): Record<string, DemoRow[]> {
         name: "Mill Stream Bible Camp",
         owner_id: DEMO_USER_ID,
         created_at: isoTime(-60 * 24 * 30),
+        subscription_status: "trialing",
+        trial_ends_at: isoTime(60 * 24 * 14),
+        stripe_customer_id: null,
+        stripe_subscription_id: null,
       },
     ],
 

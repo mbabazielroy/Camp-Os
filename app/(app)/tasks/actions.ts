@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireCamp } from "@/lib/auth";
+import { requireWritableCamp } from "@/lib/auth";
 import type { TaskPriority } from "@/lib/supabase/database.types";
 import { field } from "@/lib/form";
 
@@ -12,7 +12,7 @@ function revalidateTaskViews() {
 }
 
 export async function createTask(formData: FormData) {
-  const { supabase, campId, userId } = await requireCamp();
+  const { supabase, campId, userId } = await requireWritableCamp();
 
   const title = field(formData, "title").trim();
   if (!title) return;
@@ -34,7 +34,7 @@ export async function createTask(formData: FormData) {
 }
 
 export async function updateTask(id: string, formData: FormData) {
-  const { supabase, campId } = await requireCamp();
+  const { supabase, campId } = await requireWritableCamp();
 
   const title = field(formData, "title").trim();
   if (!title) return;
@@ -52,7 +52,7 @@ export async function updateTask(id: string, formData: FormData) {
 }
 
 export async function toggleTaskStatus(id: string, nextStatus: "open" | "done") {
-  const { supabase, campId } = await requireCamp();
+  const { supabase, campId } = await requireWritableCamp();
 
   await supabase
     .from("tasks")
@@ -64,7 +64,7 @@ export async function toggleTaskStatus(id: string, nextStatus: "open" | "done") 
 }
 
 export async function deleteTask(id: string) {
-  const { supabase, campId } = await requireCamp();
+  const { supabase, campId } = await requireWritableCamp();
 
   await supabase.from("tasks").delete().eq("id", id).eq("camp_id", campId);
 
